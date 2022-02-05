@@ -27,6 +27,18 @@ export class UsersController {
   // login/logout
   // https://docs.nestjs.com/security/authentication#implementing-passport-jwt
 
+  // 임시 로그인
+  //  mobile, OTP를 통해 임시 로그인 (타임아웃 10분)
+  //  JWT 발급 -> 이메일 및 가입일만 포함
+
+  // @Get('find')
+  // findByMobile(@Query() query: FindByMobile) {
+  //   // auth: OTP 발급 요청
+  //   // auth: 임시 인증 (전화번호, OTP)
+  //   // JWT 가지고 하기
+  //   // return this.usersService.findByMobile(query.mobile, query.code);
+  // }
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -35,14 +47,6 @@ export class UsersController {
   @Get()
   findAll(@Query() query: ListAllUsers) {
     return this.usersService.findAll(query);
-  }
-
-  @Get('find')
-  findByMobile(@Query() query: FindByMobile) {
-    // auth: OTP 발급 요청
-    // auth: 임시 인증 (전화번호, OTP)
-    // JWT 가지고 하기
-    // return this.usersService.findByMobile(query.mobile, query.code);
   }
 
   @Get(':id')
