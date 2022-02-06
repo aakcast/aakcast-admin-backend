@@ -1,0 +1,52 @@
+// See the reference: https://developers.google.com/protocol-buffers/docs/proto3
+syntax = "proto3";
+
+package aakcast;
+
+////////////////////////////////////////////////////////////////////////////////
+// UsersService and message definitions
+
+service UsersService {
+    rpc CreateUser(CreateUserRequest) returns (UserId);
+    rpc GetUser(UserId) returns (User);
+}
+
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
+    string name = 3;
+    optional string mobile = 4;
+    optional string email = 5;
+    optional string department = 7;
+}
+
+message UserId {
+    string id = 1;
+}
+
+message User {
+    string id = 1;
+    string username = 2;
+    string password = 3;
+    string name = 4;
+    string mobile = 5;
+    string email = 6;
+    string department = 7;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AuthService and message definitions
+
+service AuthService {
+    rpc RequestToken(Credentials) returns (TokenResponse);
+}
+
+message Credentials {
+    string username = 1;
+    string password = 2;
+}
+
+message TokenResponse {
+    string type = 1;
+    string token = 2;
+}

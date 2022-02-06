@@ -5,10 +5,14 @@ import {
   ListAllUsers,
   FindByMobile,
 } from './dto';
+import { GrpcClientService } from '../grpc-client/grpc-client.service';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
+  constructor(private grpcClient: GrpcClientService) {}
+
+  async create(createUserDto: CreateUserDto) {
+    await this.grpcClient.test();
     return 'This action adds a new user';
   }
 
