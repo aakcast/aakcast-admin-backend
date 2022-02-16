@@ -5,7 +5,7 @@ import { UsersModule } from './users/users.module';
 import { GrpcClientModule } from './grpc-client/grpc-client.module';
 
 @Module({
-  imports: [UsersModule, GrpcClientModule],
+  imports: [GrpcClientModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })
