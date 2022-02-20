@@ -1,0 +1,195 @@
+syntax = "proto3";
+package aakcast.user;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Common message definitions
+
+message Empty {}
+
+message Id {
+    string id = 1;
+}
+
+message ServiceDescriptor {
+    string service = 1;
+    string version = 2;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// UserService definition
+
+service UserService {
+    // Hello
+    rpc Hello(user.Empty) returns (user.ServiceDescriptor);
+
+    // Staffs
+    rpc CreateStaff(user.CreateStaffRequest) returns (user.Id);
+//    rpc ListStaffs(user.ListStaffsRequest) returns ();
+    rpc GetStaff(user.Id) returns (user.Staff);
+    rpc UpdateStaff(user.UpdateStaffRequest) returns (user.Empty);
+    rpc DeleteStaff(user.Id) returns (user.Empty);
+
+    // Sellers
+    rpc CreateSeller(user.CreateSellerRequest) returns (user.Id);
+//    rpc ListSellers(user.ListSellersRequest) returns ();
+    rpc GetSeller(user.Id) returns (user.Seller);
+    rpc UpdateSeller(user.UpdateSellerRequest) returns (user.Empty);
+    rpc SaveSelleStoreData(user.SaveSellerStoreDataRequest) returns (user.Empty);
+    rpc SaveSelleContactData(user.SaveSellerContactDataRequest) returns (user.Empty);
+    rpc SaveSelleAccountData(user.SaveSellerAccountDataRequest) returns (user.Empty);
+    rpc SaveSelleBusinessData(user.SaveSellerBusinessDataRequest) returns (user.Empty);
+    rpc GetSellerStoreData(user.Id) returns (user.SellerStoreData);
+    rpc GetSelleContactData(user.Id) returns (user.SellerContactData);
+    rpc GetSelleAccountData(user.Id) returns (user.SellerAccountData);
+    rpc GetSelleBusinessData(user.Id) returns (user.SellerBusinessData);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Message definitions
+
+message Staff {
+    string id = 1;
+    string name = 2;
+    string mobile = 3;
+    string department = 4;
+    bool is_admin = 5;
+    string joined_at = 98;
+    string deleted_at = 99;
+}
+
+message Seller {
+    string id = 1;
+    string name = 2;
+    string mobile = 3;
+    string store_data_status = 4;
+    string store_data_comment = 5;
+    string contact_data_status = 6;
+    string contact_data_comment = 7;
+    string account_data_status = 8;
+    string account_data_comment = 9;
+    string business_data_status = 10;
+    string business_data_comment = 11;
+    string joined_at = 98;
+    string deleted_at = 99;
+}
+
+message SellerStoreData {
+    string category1 = 1;
+    string category2 = 2;
+    string name = 3;
+    string profile_image_url = 4;
+    string background_image_url = 5;
+    string description = 6;
+    string region = 7;
+    string address1 = 8;
+    string address2 = 9;
+    string tel = 10;
+    string open_hours = 11;
+    string breaktime = 12;
+    string holidays = 13;
+    string extra = 14;
+}
+
+message SellerContactData {
+    string name = 1;
+    string tel = 2;
+}
+
+message SellerAccountData {
+    string bank = 1;
+    string account_holder = 2;
+    string account_number = 3;
+    string account_image_url = 4;
+}
+
+message SellerBusinessData {
+    bool is_individual = 1; // 구분 (법인/개인)
+    string rep_name = 2; // 성명(대표자)
+    string rep_phone = 3; // 대표자 연락처
+    string biz_name = 4; // 상호(법인명)
+    string biz_reg_no = 5; // 사업자등록번호
+    string biz_category = 6; // 업태
+    string biz_address = 7; // 사업장 소재지
+    string biz_email = 8; // 대표 이메일
+    string biz_reg_image_url = 9; // 사업자등록증 이미지
+    string mail_order_reg_image_url = 10; // 통신판매신고증 이미지
+}
+
+message CreateStaffRequest {
+    string name = 1;
+    string mobile = 2;
+    string department = 3;
+}
+
+message UpdateStaffRequest {
+    string id = 1;
+    optional string name = 2;
+    optional string mobile = 3;
+    optional string department = 4;
+}
+
+message CreateSellerRequest {
+    string name = 1;
+    string mobile = 2;
+}
+
+message UpdateSellerRequest {
+    string id = 1;
+    optional string store_data_status = 2;
+    optional string store_data_comment = 3;
+    optional string contact_data_status = 4;
+    optional string contact_data_comment = 5;
+    optional string account_data_status = 6;
+    optional string account_data_comment = 7;
+    optional string business_data_status = 8;
+    optional string business_data_comment = 9;
+}
+
+message SaveSellerStoreDataRequest {
+    string id = 1;
+    string category1 = 2;
+    string category2 = 3;
+    string name = 4;
+    string profile_image_url = 5;
+    string background_image_url = 6;
+    string description = 7;
+    string region = 8;
+    string address1 = 9;
+    optional string address2 = 10;
+    optional string tel = 11;
+    optional string open_hours = 12;
+    optional string breaktime = 13;
+    optional string holidays = 14;
+    optional string extra = 15;
+}
+
+message SaveSellerContactDataRequest {
+    string id = 1;
+    string name = 2;
+    string tel = 3;
+}
+
+message SaveSellerAccountDataRequest {
+    string id = 1;
+    string bank = 2;
+    string account_holder = 3;
+    string account_number = 4;
+    string account_image_url = 5;
+}
+
+message SaveSellerBusinessDataRequest {
+    string id = 1;
+    bool is_individual = 2;
+    string rep_name = 3;
+    string rep_phone = 4;
+    string biz_name = 5;
+    string biz_reg_no = 6;
+    string biz_category = 7;
+    string biz_address = 8;
+    string biz_email = 9;
+    string biz_reg_image_url = 10;
+    string mail_order_reg_image_url = 11;
+}

@@ -26,8 +26,10 @@ async function bootstrap() {
     .setTitle('aakcast™ REST API backend')
     .setDescription('REST API backend for aakcast™ admin')
     .setVersion('1.0')
-    .addTag('Users', 'Manage users')
-    .addTag('Auth', 'Authentication including OAuth2')
+    .addTag('App', '앱 기본 기능')
+    .addTag('Auth', '인증/인가')
+    .addTag('Staffs', '직원 관리')
+    .addTag('Sellers', '판매자 관리')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

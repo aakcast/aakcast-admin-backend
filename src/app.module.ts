@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
+import { GrpcClientsModule } from './grpc-clients/grpc-clients.module';
+import { AuthModule } from './auth/auth.module';
+import { StaffsModule } from './staffs/staffs.module';
+import { SellersModule } from './sellers/sellers.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { GrpcClientModule } from './grpc-client/grpc-client.module';
 
+/**
+ * Module: App
+ */
 @Module({
-  imports: [GrpcClientModule, UsersModule],
+  imports: [GrpcClientsModule, AuthModule, StaffsModule, SellersModule],
   controllers: [AppController],
   providers: [AppService],
 })

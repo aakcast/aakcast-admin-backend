@@ -1,13 +1,7 @@
 import { HttpAdapterHost } from '@nestjs/core';
-import {
-  Catch,
-  ExceptionFilter,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
-import * as http from 'http';
+import { Catch, ExceptionFilter, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { ServiceError } from '@grpc/grpc-js';
+import * as http from 'http';
 
 /**
  * Determine given exception is HttpException or not
@@ -25,15 +19,27 @@ function isGrpcError(x: any): x is ServiceError {
   return 'code' in x && 'details' in x && 'metadata' in x;
 }
 
-// Exception filter for any kind of exception
+/**
+ * ExceptionFilter: Handle all kinds of exceptions
+ */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  /**
+   * Constructor
+   *
+   * @param httpAdapterHost
+   */
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: Error, host: ArgumentsHost): void {
     let httpException: HttpException;
 
-    if (!isHttpException(exception)) {
+    if (isHttpException(exception)) {
+      // Bypass
+      httpException = exception;
+    } else {
+      // Transform to HttpException
+
       let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       let message = 'Unknown';
 
@@ -58,10 +64,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
-    httpAdapter.reply(
-      ctx.getResponse(),
-      httpException.getResponse(),
-      httpException.getStatus(),
-    );
+    httpAdapter.reply(ctx.getResponse(), httpException.getResponse(), httpException.getStatus());
   }
 }
