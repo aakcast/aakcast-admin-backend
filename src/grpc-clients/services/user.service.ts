@@ -132,6 +132,17 @@ export class UserService implements OnModuleInit {
     const void$ = this.service.updateStaff({ id, ...dto });
     await lastValueFrom(void$);
   }
+
+  /**
+   * Find seller by email or mobile #
+   *
+   * @param query email or mobile #
+   */
+  async findSeller(query: { email: string } | { mobile: string }): Promise<Staff | undefined> {
+    // TODO
+    return undefined;
+  }
+
   /**
    * Save seller store data
    *

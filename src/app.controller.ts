@@ -7,7 +7,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
+import { User } from './grpc-clients/interfaces/auth.interface';
 
 /**
  * Controller: App(root)
@@ -58,12 +59,12 @@ export class AppController {
   })
   @ApiBearerAuth()
   @ApiOkResponse({
-    description: '정상',
+    description: '성공',
   })
   @ApiUnauthorizedResponse({
     description: '로그인되지 않음',
   })
-  getProfile(@Req() req: any) {
+  getProfile(@Req() req: any): User {
     this.logger.log(`GET /v1/profile/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 

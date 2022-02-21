@@ -8,12 +8,12 @@ export interface IAuthService {
 
   createAccount(data: CreateAccountRequest): Observable<Id>;
   updateAccount(data: UpdateAccountRequest): Observable<void>;
-  validateAccount(data: ValidateAccountRequest): Observable<Authentication>;
+  validateAccount(data: ValidateAccountRequest): Observable<User>;
 
   createTemporaryCredentials(data: CreateTemporaryCredentialsRequest): Observable<Otp>;
   validateTemporaryCredentials(
     data: ValidateTemporaryCredentialsRequest,
-  ): Observable<Authentication>;
+  ): Observable<User>;
 }
 
 /**
@@ -48,12 +48,11 @@ export interface ServiceDescriptor {
 /**
  * Response type of Login and LoginTemporaryCredentials
  */
-export interface Authentication {
+export interface User {
   id: string;
-  roles: string[];
-  isAdmin: boolean;
-  staffId: string | null;
-  sellerId: string | null;
+  type: 'admin' | 'staff' | 'seller';
+  email: string;
+  joinedAt: Date;
 }
 
 /**
@@ -67,7 +66,7 @@ export interface Otp {
  * Parameter type for CreateAccount request
  */
 export interface CreateAccountRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -84,7 +83,7 @@ export interface UpdateAccountRequest extends Id {
  * Parameter type for ValidateAccount request
  */
 export interface ValidateAccountRequest {
-  username: string;
+  email: string;
   password: string;
 }
 

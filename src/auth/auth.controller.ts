@@ -1,20 +1,40 @@
-import { Controller, Post, Body, Req, UseGuards, HttpCode, Logger } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Post,
+  Get,
+  HttpCode,
+  Req,
+  Query,
+  Body,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
   ApiTags,
   ApiOperation,
+  ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiNoContentResponse,
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
+  ApiConflictResponse,
 } from '@nestjs/swagger';
+import { UserService } from '../grpc-clients/services/user.service';
 import { AuthService } from '../grpc-clients/services/auth.service';
-import { Authentication } from '../grpc-clients/interfaces/auth.interface';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { LoginDto } from './dto/login.dto';
+import { User } from '../grpc-clients/interfaces/auth.interface';
+import { UserTypes } from '../core/decorators/user-types.decorator';
+import { UserType } from '../core/enums/user-type.enum';
+import { LocalAuthGuard } from '../core/guards/local-auth.guard';
+import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { UserTypesGuard } from '../core/guards/user-types.guard';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EmailVerification } from './types/email-verification';
+import { TokenDescriptor } from './types/token-descriptor';
 
 /**
  * Controller: Auth
@@ -31,31 +51,78 @@ export class AuthController {
   /**
    * Constructor
    *
+   * @param userService Injected instance of UserService
    * @param authService Injected instance of AuthService
    * @param jwtService  Injected instance of JwtService
    */
-  constructor(private readonly authService: AuthService, private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   /**
-   * Request handler - POST /auth/login/
+   * GET /v1/auth/verify-email/
+   *
+   * @param verifyEmailDto  VerifyEmailDto
+   */
+  @Get('verify-email')
+  @ApiOperation({
+    summary: '이메일 확인',
+    description: '이메일의 가입 여부를 확인한다.',
+  })
+  @ApiOkResponse({ description: '성공', type: EmailVerification })
+  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<EmailVerification> {
+    this.logger.log(`GET /v1/auth/verify-email/`);
+    this.logger.log(`> query = ${JSON.stringify(verifyEmailDto)}`);
+
+    const { email } = verifyEmailDto;
+
+    // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
+    const staff = await this.userService.findSeller({ email });
+
+    return {
+      email,
+      exists: staff !== null && staff !== undefined,
+    };
+  }
+
+  /**
+   * POST /v1/auth/login/
    *
    * @param req   request object
    */
-  @UseGuards(LocalAuthGuard)
   @Post('login')
+  @UseGuards(LocalAuthGuard)
   @ApiOperation({
     summary: '로그인',
     description: '이메일과 비밀번호를 통해 로그인하고 JWT 토큰을 발급받는다.',
   })
-  @ApiBody({ type: LoginDto })
-  @ApiOkResponse({ description: '로그인 성공' })
-  @ApiUnauthorizedResponse({ description: '로그인 실패' })
-  @ApiNotFoundResponse({ description: '존재하지 않는 이메일' })
-  login(@Req() req: any) {
-    this.logger.log(`POST /auth/login/`);
+  @ApiBody({
+    schema: {
+      title: 'LoginDto',
+      required: ['email', 'password'],
+      properties: {
+        email: {
+          type: 'string',
+          description: '로그인 ID (이메일)',
+          example: 'mankiplayer@gmail.com',
+        },
+        password: {
+          type: 'string',
+          description: '로그인 비밀번호',
+          example: 'p@ssw0rd',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({ description: '성공', type: TokenDescriptor })
+  @ApiUnauthorizedResponse({ description: '존재하지 않는 이메일 또는 비밀번호 불일치' })
+  login(@Req() req: any): TokenDescriptor {
+    this.logger.log(`POST /v1/auth/login/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 
-    const { id: sub, ...data }: Authentication = req.user;
+    const { id: sub, ...data }: User = req.user;
     const token = this.jwtService.sign({ sub, ...data });
     this.logger.log(`>> token generated: ${token}`);
 
@@ -67,9 +134,9 @@ export class AuthController {
   }
 
   /**
-   * Request handler - POST /auth/request-otp/
+   * POST /v1/auth/request-otp/
    *
-   * @param body  request body
+   * @param requestOtpDto RequestOtpDto
    */
   @Post('request-otp')
   @HttpCode(204)
@@ -77,17 +144,17 @@ export class AuthController {
     summary: '인증코드 발급',
     description: '6자리 일회용 인증코드를 발급하고 사용자 핸드폰으로 전송한다.',
   })
-  @ApiBody({ type: RequestOtpDto })
   @ApiNoContentResponse({ description: '정상적으로 처리됨' })
   @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없음' })
-  async requestOtp(@Body() body: RequestOtpDto): Promise<void> {
-    this.logger.log(`POST /auth/request-otp/`);
-    this.logger.log(`> body = ${JSON.stringify(body)}`);
+  async requestOtp(@Body() requestOtpDto: RequestOtpDto): Promise<void> {
+    this.logger.log(`POST /v1/auth/request-otp/`);
+    this.logger.log(`> body = ${JSON.stringify(requestOtpDto)}`);
 
-    const { mobile } = body;
+    const { mobile } = requestOtpDto;
+    const digits = 6;
 
     // Create OTP with mobile
-    const otp = await this.authService.createTemporaryCredentials(mobile, 6);
+    const otp = await this.authService.createTemporaryCredentials(mobile, digits);
     this.logger.log(`>> OTP created: ${mobile} [${otp.code}]`);
 
     // TODO: to be triggered by event
@@ -97,24 +164,23 @@ export class AuthController {
   }
 
   /**
-   * Request handler - POST /auth/login-otp/
+   * POST /v1/auth/login-otp/
    *
-   * @param body  request body
+   * @param loginOtpDto LoginOtpDto
    */
   @Post('login-otp')
   @ApiOperation({
     summary: '인증코드로 로그인',
-    description:
-      '사용자 핸드폰으로 전송된 일회용 인증코드를 통해 임시 자격으로 로그인한다. 이 후 본인 계정 정보를 확인하거나 비밀번호를 변경할 수 있다.',
+    description: '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이후 계정 정보를 확인하거나 비밀번호를 변경할 수 있다.',
   })
-  @ApiOkResponse({ description: '로그인 성공' })
-  @ApiUnauthorizedResponse({ description: '로그인 실패' })
-  @ApiNotFoundResponse({ description: '임시 자격 정보를 찾을 수 없거나 이미 만료됨' })
-  async loginWithOtp(@Body() body: LoginOtpDto) {
+  @ApiOkResponse({ description: '성공', type: TokenDescriptor })
+  @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없음' })
+  @ApiUnauthorizedResponse({ description: '잘못된 인증번호이거나 인증 시간이 초과됨' })
+  async loginWithOtp(@Body() loginOtpDto: LoginOtpDto): Promise<TokenDescriptor> {
     this.logger.log(`POST /auth/login-otp/`);
-    this.logger.log(`> body = ${JSON.stringify(body)}`);
+    this.logger.log(`> body = ${JSON.stringify(loginOtpDto)}`);
 
-    const { mobile, code } = body;
+    const { mobile, code } = loginOtpDto;
 
     const auth = await this.authService.validateTemporaryCredentials(mobile, code);
     const token = this.jwtService.sign(auth);
@@ -125,5 +191,30 @@ export class AuthController {
       format: 'JWT',
       token,
     };
+  }
+
+  /**
+   * POST /v1/auth/reset-password/
+   *
+   * @param resetPasswordDto  ResetPasswordDto
+   */
+  @Post('reset-password')
+  @UserTypes(UserType.Temp)
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @ApiOperation({
+    summary: '비밀번호 재설정',
+    description: '이메일과 인증코드를 이용하여 비밀번호를 재설정한다.',
+  })
+  @ApiBearerAuth()
+  @ApiNoContentResponse({ description: '성공' })
+  @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없음' })
+  @ApiUnauthorizedResponse({ description: '잘못된 인증번호이거나 인증 시간이 초과됨' })
+  @ApiConflictResponse({ description: '변경하려는 비밀번호가 현재 비밀번호와 동일함' })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
+    this.logger.log(`POST /auth/reset-password/`);
+    this.logger.log(`> body = ${JSON.stringify(resetPasswordDto)}`);
+
+    // TODO
+    // await this.authService.resetPassword(resetPassword);
   }
 }

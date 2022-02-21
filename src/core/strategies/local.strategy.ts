@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { lastValueFrom } from 'rxjs';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../../grpc-clients/services/auth.service';
-import { Authentication } from '../../grpc-clients/interfaces/auth.interface';
+import { User } from '../../grpc-clients/interfaces/auth.interface';
 
 /**
  * Passport strategy: Local
@@ -25,8 +25,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * @param username  login ID of user
    * @param password  login password of user
    */
-  async validate(username: string, password: string): Promise<Authentication | null> {
-    const user = await this.authService.validateAccount(username, password);
+  async validate(username: string, password: string): Promise<User | null> {
+    const user = await this.authService.validateUser(username, password);
     if (!user) {
       throw new UnauthorizedException();
     }

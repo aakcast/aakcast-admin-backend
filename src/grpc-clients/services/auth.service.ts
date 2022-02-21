@@ -5,7 +5,7 @@ import {
   IAuthService,
   Id,
   ServiceDescriptor,
-  Authentication,
+  User,
   Otp,
 } from '../interfaces/auth.interface';
 
@@ -42,21 +42,20 @@ export class AuthService implements OnModuleInit {
     return await lastValueFrom(svc$);
   }
 
-  async getOrCreateAccount(username: string, password: string): Promise<Authentication> {
+  async getOrCreateAccount(email: string, password: string): Promise<User> {
     try {
-      const auth$ = this.service.validateAccount({ username, password });
+      const auth$ = this.service.validateAccount({ email, password });
       return await lastValueFrom(auth$);
     } catch (e) {
       if (typeof e.details === 'string' && e.details.startsWith('404')) {
         // Create new account
-        const id$ = this.service.createAccount({ username, password });
+        const id$ = this.service.createAccount({ email, password });
         const { id } = await lastValueFrom(id$);
         return {
           id,
-          roles: [],
-          isAdmin: false,
-          staffId: null,
-          sellerId: null,
+          type: 'admin',
+          email: '',
+          joinedAt: new Date(),
         };
       } else {
         // Error
@@ -78,11 +77,11 @@ export class AuthService implements OnModuleInit {
   /**
    * Validate account for login
    *
-   * @param username  login ID of user
+   * @param email     login email of user
    * @param password  login password of user
    */
-  async validateAccount(username: string, password: string): Promise<Authentication | null> {
-    const auth$ = this.service.validateAccount({ username, password });
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const auth$ = this.service.validateAccount({ email, password });
     return await lastValueFrom(auth$);
   }
 
@@ -106,7 +105,7 @@ export class AuthService implements OnModuleInit {
    * @param mobile  mobile number of user
    * @param code    OTP
    */
-  async validateTemporaryCredentials(mobile: string, code: string): Promise<Authentication> {
+  async validateTemporaryCredentials(mobile: string, code: string): Promise<User> {
     const auth$ = this.service.validateTemporaryCredentials({ mobile, code });
     return await lastValueFrom(auth$);
   }

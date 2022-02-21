@@ -30,7 +30,7 @@ import {
   SellerAccountData,
   SellerBusinessData,
 } from '../grpc-clients/interfaces/user.interface';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { ListSellers } from './dto/list-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
@@ -87,8 +87,8 @@ export class SellersController {
 
   @Get()
   @ApiOperation({
-    summary: '유저 목록 및 검색',
-    description: '유저 목록을 가져오거나 검색한다.',
+    summary: '판매자 목록 및 검색',
+    description: '판매자 목록을 가져오거나 검색한다.',
   })
   @ApiOkResponse()
   async find(@Query() query: ListSellers) {
