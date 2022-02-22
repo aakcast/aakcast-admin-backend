@@ -2,12 +2,23 @@ import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { VersioningType, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import fastifyCookie from 'fastify-cookie';
+import fastifyCsrf from 'fastify-csrf';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './core/filters/exception.filter';
 
 async function bootstrap() {
   const serverApp = new FastifyAdapter();
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, serverApp);
+
+  // Enable CORS
+  app.enableCors();
+
+  // CSRF protection
+  await app.register(fastifyCookie, {
+    secret: 'my-secret', // TODO
+  });
+  await app.register(fastifyCsrf);
 
   // Set API version
   app.enableVersioning({
