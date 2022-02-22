@@ -23,9 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { UserService } from '../grpc-clients/services/user.service';
 import { AuthService } from '../grpc-clients/services/auth.service';
-import { User } from '../grpc-clients/interfaces/auth.interface';
+import { UserType, User } from '../grpc-clients/interfaces/auth.interface';
 import { UserTypes } from '../core/decorators/user-types.decorator';
-import { UserType } from '../core/enums/user-type.enum';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
 import { UserTypesGuard } from '../core/guards/user-types.guard';
@@ -171,19 +170,21 @@ export class AuthController {
   @Post('login-otp')
   @ApiOperation({
     summary: '인증코드로 로그인',
-    description: '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이후 계정 정보를 확인하거나 비밀번호를 변경할 수 있다.',
+    description: '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이메일을 제공하여 로그인 한 경우 비밀번호 변경 권한이 주어지고 그렇지 않은 경우 계정 정보만 확인할 수 있다.',
   })
   @ApiOkResponse({ description: '성공', type: TokenDescriptor })
-  @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없음' })
+  @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없거나 또는 핸드폰가 일치하지 않음 (이메일 제공 시에만)' })
   @ApiUnauthorizedResponse({ description: '잘못된 인증번호이거나 인증 시간이 초과됨' })
   async loginWithOtp(@Body() loginOtpDto: LoginOtpDto): Promise<TokenDescriptor> {
     this.logger.log(`POST /auth/login-otp/`);
     this.logger.log(`> body = ${JSON.stringify(loginOtpDto)}`);
 
-    const { mobile, code } = loginOtpDto;
+    const { mobile, code, email } = loginOtpDto;
 
-    const auth = await this.authService.validateTemporaryCredentials(mobile, code);
-    const token = this.jwtService.sign(auth);
+    const auth = await this.authService.validateTemporaryCredentials(mobile, code, email);
+    this.logger.log(`>> user authorized: ${auth}`);
+
+    const token = this.jwtService.sign(auth, { expiresIn: '5m' }); // available for 5 minutes
     this.logger.log(`>> token generated: ${token}`);
 
     return {
@@ -196,10 +197,11 @@ export class AuthController {
   /**
    * POST /v1/auth/reset-password/
    *
+   * @param req               request object
    * @param resetPasswordDto  ResetPasswordDto
    */
   @Post('reset-password')
-  @UserTypes(UserType.Temp)
+  @UserTypes(UserType.TempAuthorizedLv2)
   @UseGuards(JwtAuthGuard, UserTypesGuard)
   @ApiOperation({
     summary: '비밀번호 재설정',
@@ -210,11 +212,12 @@ export class AuthController {
   @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없음' })
   @ApiUnauthorizedResponse({ description: '잘못된 인증번호이거나 인증 시간이 초과됨' })
   @ApiConflictResponse({ description: '변경하려는 비밀번호가 현재 비밀번호와 동일함' })
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
+  async resetPassword(@Req() req: any, @Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
     this.logger.log(`POST /auth/reset-password/`);
     this.logger.log(`> body = ${JSON.stringify(resetPasswordDto)}`);
 
-    // TODO
-    // await this.authService.resetPassword(resetPassword);
+    const { id }: User = req.user;
+
+    await this.authService.resetPassword(id, resetPasswordDto.password);
   }
 }

@@ -1,23 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMobilePhone, IsNotEmpty, IsNumberString, Length } from 'class-validator';
+import { IsString, MinLength } from 'class-validator';
 
 /**
  * DTO: ResetPassword
  */
 export class ResetPasswordDto {
-  @IsMobilePhone('ko-KR')
-  @IsNotEmpty()
+  @IsString()
+  @MinLength(6)
   @ApiProperty({
-    description: '사용자 핸드폰 번호',
-    example: '01091910202',
+    description: '재설정할 비밀번호',
+    example: 'p@ssw0rd',
   })
-  mobile: string;
-
-  @IsNumberString()
-  @Length(6)
-  @ApiProperty({
-    description: '6자리 일회용 인증코드',
-    example: '623094',
-  })
-  code: string;
+  password: string;
 }

@@ -29,12 +29,14 @@ export interface Id {
 }
 
 /**
- - * Roles of users
- + * Seller data submission status
+ * Enum: type of users
  */
-export enum Role {
+export enum UserType {
+  Admin = 'admin',
   Staff = 'staff',
-  Vendor = 'vendor',
+  Seller = 'seller',
+  TempAuthorizedLv1 = 'temp1', // temporary authenticated user who can only view one's profile
+  TempAuthorizedLv2 = 'temp2', // temporary authenticated user who can only reset one's password
 }
 
 /**
@@ -50,7 +52,7 @@ export interface ServiceDescriptor {
  */
 export interface User {
   id: string;
-  type: 'admin' | 'staff' | 'seller';
+  type: UserType;
   email: string;
   joinedAt: Date;
 }
@@ -102,4 +104,5 @@ export interface CreateTemporaryCredentialsRequest {
 export interface ValidateTemporaryCredentialsRequest {
   mobile: string;
   code: string;
+  email?: string;
 }

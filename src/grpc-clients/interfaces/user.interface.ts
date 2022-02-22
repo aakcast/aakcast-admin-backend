@@ -32,7 +32,7 @@ export interface IUserService {
 export type Empty = Record<string, never>;
 
 /**
- * Seller data submission status
+ * Enum: Seller data submission status
  */
 export enum SellerDataStatus {
   None = '',

@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumberString, IsMobilePhone, IsNotEmpty, Length } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsNumberString,
+  IsMobilePhone,
+  IsNotEmpty,
+  IsOptional,
+  Length,
+} from 'class-validator';
 
 /**
  * DTO: LoginOtp
@@ -20,4 +27,12 @@ export class LoginOtpDto {
     example: '623094',
   })
   code: string;
+
+  @IsEmail()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: '로그인 ID (이메일)',
+    example: 'mankiplayer@gmail.com',
+  })
+  email: string;
 }

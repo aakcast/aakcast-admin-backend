@@ -3,8 +3,8 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import {
   IAuthService,
-  Id,
   ServiceDescriptor,
+  UserType,
   User,
   Otp,
 } from '../interfaces/auth.interface';
@@ -53,7 +53,7 @@ export class AuthService implements OnModuleInit {
         const { id } = await lastValueFrom(id$);
         return {
           id,
-          type: 'admin',
+          type: UserType.Admin,
           email: '',
           joinedAt: new Date(),
         };
@@ -104,9 +104,14 @@ export class AuthService implements OnModuleInit {
    *
    * @param mobile  mobile number of user
    * @param code    OTP
+   * @param email   email (give higher authorization level)
    */
-  async validateTemporaryCredentials(mobile: string, code: string): Promise<User> {
-    const auth$ = this.service.validateTemporaryCredentials({ mobile, code });
+  async validateTemporaryCredentials(mobile: string, code: string, email?: string): Promise<User> {
+    const auth$ = this.service.validateTemporaryCredentials({ mobile, code, email });
     return await lastValueFrom(auth$);
+  }
+
+  async resetPassword(id: string, password: string): Promise<void> {
+    // TODO
   }
 }
