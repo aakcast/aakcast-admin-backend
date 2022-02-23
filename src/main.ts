@@ -4,6 +4,7 @@ import { VersioningType, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import fastifyCookie from 'fastify-cookie';
 import fastifyCsrf from 'fastify-csrf';
+import fastifyMultipart from 'fastify-multipart';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './core/filters/exception.filter';
 
@@ -14,11 +15,15 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors();
 
-  // CSRF protection
-  await app.register(fastifyCookie, {
-    secret: 'my-secret', // TODO
-  });
-  await app.register(fastifyCsrf);
+  // Register fastify plugins
+  await Promise.all([
+    // 1. cookie
+    app.register(fastifyCookie, { secret: 'my-secret' }), // TODO
+    // 2. CSRF protection
+    app.register(fastifyCsrf),
+    // 3. Multipart file upload
+    app.register(fastifyMultipart),
+  ]);
 
   // Set API version
   app.enableVersioning({

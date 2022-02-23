@@ -89,7 +89,7 @@ export class AuthController {
   /**
    * POST /v1/auth/login/
    *
-   * @param req   request object
+   * @param req   Request object
    */
   @Post('login')
   @UseGuards(LocalAuthGuard)
@@ -197,12 +197,12 @@ export class AuthController {
   /**
    * POST /v1/auth/reset-password/
    *
-   * @param req               request object
+   * @param req               Request object
    * @param resetPasswordDto  ResetPasswordDto
    */
   @Post('reset-password')
-  @UserTypes(UserType.TempAuthorizedLv2)
   @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.TempAuthorizedLv2)
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: '이메일과 인증코드를 이용하여 비밀번호를 재설정한다.',

@@ -1,36 +1,45 @@
 import {
+  BadRequestException,
   Body,
-  Controller,
-  UseGuards,
+  Controller, ForbiddenException,
   Get,
+  Logger,
+  Param,
+  Patch,
   Post,
   Put,
-  Patch,
-  Req,
-  Param,
   Query,
-  Logger,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNoContentResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../grpc-clients/services/user.service';
 import { AuthService } from '../grpc-clients/services/auth.service';
+import { UserType } from '../grpc-clients/interfaces/auth.interface';
+import { UserTypes } from '../core/decorators/user-types.decorator';
 import {
   Seller,
-  SellerDataStatus,
-  SellerStoreData,
-  SellerContactData,
   SellerAccountData,
   SellerBusinessData,
+  SellerContactData,
+  SellerDataStatus,
+  SellerStoreData,
 } from '../grpc-clients/interfaces/user.interface';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { UserTypesGuard } from '../core/guards/user-types.guard';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { ListSellers } from './dto/list-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
@@ -62,6 +71,11 @@ export class SellersController {
     private readonly authService: AuthService,
   ) {}
 
+  /**
+   * POST /v1/sellers/
+   *
+   * @param createSellerDto CreateSellerDto
+   */
   @Post()
   @ApiOperation({
     summary: '판매자 생성',
@@ -85,13 +99,20 @@ export class SellersController {
     await this.authService.updateAccount(accountId, { sellerId });
   }
 
+  /**
+   * GET /v1/sellers/
+   *
+   * @param query ListSellers
+   */
   @Get()
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Admin, UserType.Staff, UserType.Seller)
   @ApiOperation({
     summary: '판매자 목록 및 검색',
     description: '판매자 목록을 가져오거나 검색한다.',
   })
   @ApiOkResponse()
-  async find(@Query() query: ListSellers) {
+  async find(@Query() query: ListSellers): Promise<void> {
     this.logger.log(`GET /v1/sellers/`);
     this.logger.log(`> query = ${JSON.stringify(query)}`);
 
@@ -99,6 +120,11 @@ export class SellersController {
     // return await this.userService.listSellers(query);
   }
 
+  /**
+   * GET /v1/sellers/:id/
+   *
+   * @param id  Seller ID
+   */
   @Get(':id')
   @ApiOperation({
     summary: '판매자 정보 상세',
@@ -112,8 +138,16 @@ export class SellersController {
     return this.userService.getSeller(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  /**
+   * PATCH /v1
+   *
+   * @param req             Request object
+   * @param id              Seller ID
+   * @param updateSellerDto UpdateSellerDto
+   */
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Admin, UserType.Staff)
   @ApiOperation({
     summary: '판매자 정보 수정',
     description: '판매자 정보를 수정한다.',
@@ -135,13 +169,87 @@ export class SellersController {
     await this.userService.updateSeller(id, updateSellerDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  /**
+   * POST /v1/sellers/:id/upload/
+   *
+   * @param id  Seller ID
+   * @param req Request object
+   * @param res Reply object
+   */
+  @Post(':id/upload')
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Seller)
   @ApiOperation({
-    summary: '스토어 정보 저장',
-    description: '[벤더 전용] 스토어 정보를 저장한다.',
+    summary: '파일 업로드',
+    description: '판매자와 관련된 파일(이미지)를 업로드한다.',
   })
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  @ApiOkResponse({ description: '성공' })
+  async uploadFiles(
+    @Param('id') id: string,
+    @Req() req: FastifyRequest,
+    @Res() res: FastifyReply,
+  ): Promise<void> {
+    this.logger.log(`POST /v1/sellers/${'id'}/upload/`);
+    this.logger.log(`> req.isMultipart? ${req.isMultipart()}`);
+
+    if (!req.isMultipart()) {
+      throw new BadRequestException();
+    }
+
+    // TODO: This is temporary implementation - files should be uploaded to S3
+    // const fs = await require('fs');
+    // const path = await require('path');
+    // const crypto = await require('crypto');
+    // const util = await require('util');
+    // const { pipeline } = await require('stream');
+    // const getHashFileName = async (part: MultipartFile, algorithm = 'sha256'): Promise<string> => {
+    //   const hash = crypto.createHash(algorithm);
+    //   hash.update(await part.toBuffer());
+    //   const ext = path.extname(part.filename);
+    //   return `${hash.digest('hex')}${ext}`;
+    // };
+    // const dir = `assets/sellers/${id}`;
+    // const pump = util.promisify(pipeline);
+    // fs.mkdirSync(dir, { recursive: true });
+    // for await (const part of req.files()) {
+    //   const filename = await getHashFileName(part);
+    //   await pump(part.file, fs.createWriteStream(`${dir}/${filename}`));
+    // }
+    ////////////////////////////////////////////////////////////////////////////
+
+    res.code(200).send();
+  }
+
+  /**
+   * PUT /v1/sellers/:id/store-data/
+   *
+   * @param id                Seller ID
+   * @param saveStoreDataDto  SaveStoreDataDto
+   */
   @Put(':id/store-data')
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Seller)
+  @ApiOperation({
+    summary: '스토어 정보 저장',
+    description: '스토어 정보를 저장한다.',
+  })
+  @ApiBearerAuth()
   @ApiNoContentResponse({ description: '정상 처리됨' })
   async saveStoreData(
     @Param('id') id: string,
@@ -157,6 +265,11 @@ export class SellersController {
     await this.userService.updateSeller(id, updateSellerDto);
   }
 
+  /**
+   * GET /v1/sellers/:id/store-data/
+   *
+   * @param id  Seller ID
+   */
   @Get(':id/store-data')
   @ApiOperation({
     summary: '스토어 정보 상세',
@@ -169,20 +282,34 @@ export class SellersController {
     return await this.userService.getSellerStoreData(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  /**
+   * PUT /v1/sellers/:id/contact-data/
+   *
+   * @param req                 Request object
+   * @param id                  Seller ID
+   * @param saveContactDataDto  SaveContactDataDto
+   */
+  @Put(':id/contact-data')
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '셀러 정보 저장',
-    description: '[벤더 전용] 셀러 정보를 저장한다.',
+    description: '셀러 정보를 저장한다.',
   })
   @ApiBearerAuth()
-  @Put(':id/contact-data')
   @ApiNoContentResponse({ description: '정상 처리됨' })
+  @ApiForbiddenResponse({ description: '다른 판매자 정보에 대한 수정 요청' })
   async saveContactData(
+    @Req() req: any,
     @Param('id') id: string,
     @Body() saveContactDataDto: SaveContactDataDto,
   ): Promise<void> {
     this.logger.log(`PUT /v1/sellers/${id}/contact-data/`);
     this.logger.log(`> body = ${JSON.stringify(saveContactDataDto)}`);
+
+    if (req.user.id !== id) {
+      throw new ForbiddenException();
+    }
 
     await this.userService.saveSellerContactData(id, saveContactDataDto);
 
@@ -191,6 +318,11 @@ export class SellersController {
     await this.userService.updateSeller(id, updateSellerDto);
   }
 
+  /**
+   * GET /v1/sellers/:id/contact-data/
+   *
+   * @param id  Seller ID
+   */
   @Get(':id/contact-data')
   @ApiOperation({
     summary: '셀러 정보 상세',
@@ -203,13 +335,14 @@ export class SellersController {
     return await this.userService.getSellerContactData(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Put(':id/account-data')
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '정산 정보 저장',
-    description: '[벤더 전용] 정산 정보를 저장한다.',
+    description: '정산 정보를 저장한다.',
   })
   @ApiBearerAuth()
-  @Put(':id/account-data')
   @ApiNoContentResponse({ description: '정상 처리됨' })
   async saveAccountData(
     @Param('id') id: string,
@@ -237,13 +370,14 @@ export class SellersController {
     return await this.userService.getSellerAccountData(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Put(':id/business-data')
+  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '사업자 정보 저장',
-    description: '[벤더 전용] 사업자 정보를 저장한다.',
+    description: '사업자 정보를 저장한다.',
   })
   @ApiBearerAuth()
-  @Put(':id/business-data')
   @ApiNoContentResponse({ description: '정상 처리됨' })
   async saveBusinessData(
     @Param('id') id: string,

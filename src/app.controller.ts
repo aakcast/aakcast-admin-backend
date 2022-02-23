@@ -49,21 +49,17 @@ export class AppController {
   /**
    * GET /v1/profile/
    *
-   * @param req request object
+   * @param req Request object
    */
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '로그인 정보 확인',
     description: '로그인 상태 등을 확인하고 사용자의 간단한 정보를 확인할 수 있다.',
   })
   @ApiBearerAuth()
-  @ApiOkResponse({
-    description: '성공',
-  })
-  @ApiUnauthorizedResponse({
-    description: '로그인되지 않음',
-  })
+  @ApiOkResponse({ description: '성공' })
+  @ApiUnauthorizedResponse({ description: '로그인되지 않음' })
   getProfile(@Req() req: any): User {
     this.logger.log(`GET /v1/profile/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
