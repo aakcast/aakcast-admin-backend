@@ -22,10 +22,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { UserTypes } from '../core/decorators/user-types.decorator';
+import { Role } from '../core/enum/role.enum';
+import { Roles } from '../core/decorators/role.decorator';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { UserTypesGuard } from '../core/guards/user-types.guard';
+import { RolesGuard } from '../core/guards/roles.guard';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
@@ -196,8 +197,8 @@ export class AuthController {
    * @param resetPasswordDto  ResetPasswordDto
    */
   @Post('reset-password')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
-  @UserTypes(UserType.Temp)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Temp)
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: '이메일과 인증코드를 이용하여 비밀번호를 재설정한다.',

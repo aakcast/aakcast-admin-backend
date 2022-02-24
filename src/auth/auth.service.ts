@@ -5,6 +5,9 @@ import { APP_SERVICE_NAME, AUTH_SERVICE_NAME, AppClient, AuthClient } from '../p
 import { User, UserType } from './types/user';
 import { Otp } from './types/otp';
 
+/**
+ * Service: Auth
+ */
 @Injectable()
 export class AuthService implements OnModuleInit {
   /**

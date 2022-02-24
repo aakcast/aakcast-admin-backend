@@ -1,9 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { lastValueFrom } from 'rxjs';
 import { Strategy } from 'passport-local';
-import { AuthService } from '../../grpc-clients/services/auth.service';
-import { User } from '../../grpc-clients/interfaces/auth.interface';
+import { AuthService } from '../../auth/auth.service';
+import { User, UserType } from '../../proto/auth';
 
 /**
  * Passport strategy: Local
@@ -13,7 +12,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   /**
    * Constructor
    *
-   * @param authService Injected instance of auth microservice
+   * @param authService Injected instance of auth service
    */
   constructor(private readonly authService: AuthService) {
     super();
@@ -25,8 +24,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * @param username  login ID of user
    * @param password  login password of user
    */
-  async validate(username: string, password: string): Promise<User | null> {
-    const user = await this.authService.validateUser(username, password);
+  async validate(username: string, password: string): Promise<User> {
+    // TODO: 좀 이상하구나. 'local-staff', 'local-admin' 이렇게 써야 할 듯.
+    const user =
+      (await this.authService.validateUser(UserType.Staff, username, password)) ||
+      (await this.authService.validateUser(UserType.Seller, username, password));
     if (!user) {
       throw new UnauthorizedException();
     }

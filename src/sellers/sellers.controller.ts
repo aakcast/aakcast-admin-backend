@@ -29,7 +29,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../grpc-clients/services/user.service';
 import { AuthService } from '../grpc-clients/services/auth.service';
 import { UserType } from '../grpc-clients/interfaces/auth.interface';
-import { UserTypes } from '../core/decorators/user-types.decorator';
+import { UserTypes } from '../core/decorators/role.decorator';
 import {
   Seller,
   SellerAccountData,
@@ -39,7 +39,7 @@ import {
   SellerStoreData,
 } from '../grpc-clients/interfaces/user.interface';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { UserTypesGuard } from '../core/guards/user-types.guard';
+import { RolesGuard } from '../core/guards/roles.guard';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { ListSellers } from './dto/list-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
@@ -105,8 +105,8 @@ export class SellersController {
    * @param query ListSellers
    */
   @Get()
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
-  @UserTypes(UserType.Admin, UserType.Staff, UserType.Seller)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UserTypes(UserType.Staff, UserType.Seller)
   @ApiOperation({
     summary: '판매자 목록 및 검색',
     description: '판매자 목록을 가져오거나 검색한다.',
@@ -146,7 +146,7 @@ export class SellersController {
    * @param updateSellerDto UpdateSellerDto
    */
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UserTypes(UserType.Admin, UserType.Staff)
   @ApiOperation({
     summary: '판매자 정보 수정',
@@ -177,7 +177,7 @@ export class SellersController {
    * @param res Reply object
    */
   @Post(':id/upload')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '파일 업로드',
@@ -243,7 +243,7 @@ export class SellersController {
    * @param saveStoreDataDto  SaveStoreDataDto
    */
   @Put(':id/store-data')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '스토어 정보 저장',
@@ -290,7 +290,7 @@ export class SellersController {
    * @param saveContactDataDto  SaveContactDataDto
    */
   @Put(':id/contact-data')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '셀러 정보 저장',
@@ -336,7 +336,7 @@ export class SellersController {
   }
 
   @Put(':id/account-data')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '정산 정보 저장',
@@ -371,7 +371,7 @@ export class SellersController {
   }
 
   @Put(':id/business-data')
-  @UseGuards(JwtAuthGuard, UserTypesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UserTypes(UserType.Seller)
   @ApiOperation({
     summary: '사업자 정보 저장',

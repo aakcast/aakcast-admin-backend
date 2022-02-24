@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
-import { User } from './grpc-clients/interfaces/auth.interface';
+import { User } from './auth/types/user';
 
 /**
  * Controller: App(root)
