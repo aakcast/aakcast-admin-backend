@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsEnum, IsOptional, MinLength } from 'class-validator';
-import { SellerDataStatus } from '../../grpc-clients/interfaces/user.interface';
+import { DataStatus } from '../enums/data-status.enum';
 
 /**
  * DTO: UpdateSeller
@@ -13,65 +13,73 @@ export class UpdateSellerDto {
     description: '로그인 비밀번호',
     example: 'p@ssw0rd',
   })
-  password: string;
+  password?: string;
 
-  @IsEnum(SellerDataStatus)
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: '판매자명',
+    example: 'aakcast',
+  })
+  name?: string;
+
+  @IsEnum(DataStatus)
   @IsOptional()
   @ApiPropertyOptional({
     description: '스토어 정보 심사 상태',
-    example: SellerDataStatus.Approved,
+    example: DataStatus.Approved,
   })
-  storeDataStatus: SellerDataStatus;
+  storeDataStatus?: DataStatus;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: '스토어 정보 거절 사유',
   })
-  storeDataComment: string;
+  storeDataComment?: string;
 
-  @IsEnum(SellerDataStatus)
+  @IsEnum(DataStatus)
   @IsOptional()
   @ApiPropertyOptional({
     description: '셀러 정보 심사 상태',
-    example: SellerDataStatus.Approved,
+    example: DataStatus.Approved,
   })
-  contactDataStatus: SellerDataStatus;
+  contactDataStatus?: DataStatus;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: '셀러 정보 거절 사유',
   })
-  contactDataComment: string;
+  contactDataComment?: string;
 
-  @IsEnum(SellerDataStatus)
+  @IsEnum(DataStatus)
   @IsOptional()
   @ApiPropertyOptional({
     description: '정산 정보 심사 상태',
-    example: SellerDataStatus.Approved,
+    example: DataStatus.Approved,
   })
-  accountDataStatus: SellerDataStatus;
+  accountDataStatus?: DataStatus;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: '정산 정보 거절 사유',
   })
-  accountDataComment: string;
+  accountDataComment?: string;
 
-  @IsEnum(SellerDataStatus)
+  @IsEnum(DataStatus)
   @IsOptional()
   @ApiPropertyOptional({
     description: '사업자 정보 심사 상태',
-    example: SellerDataStatus.Approved,
+    example: DataStatus.Approved,
   })
-  businessDataStatus: SellerDataStatus;
+  businessDataStatus?: DataStatus;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: '사업자 정보 거절 사유',
   })
-  businessDataComment: string;
+  businessDataComment?: string;
 }

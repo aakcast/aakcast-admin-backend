@@ -1,7 +1,7 @@
 import {
   BadRequestException,
   Body,
-  Controller, ForbiddenException,
+  Controller,
   Get,
   Logger,
   Param,
@@ -18,28 +18,16 @@ import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
-  ApiNoContentResponse,
   ApiForbiddenResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { UserService } from '../grpc-clients/services/user.service';
-import { AuthService } from '../grpc-clients/services/auth.service';
-import { UserType } from '../grpc-clients/interfaces/auth.interface';
-import { UserTypes } from '../core/decorators/role.decorator';
-import {
-  Seller,
-  SellerAccountData,
-  SellerBusinessData,
-  SellerContactData,
-  SellerDataStatus,
-  SellerStoreData,
-} from '../grpc-clients/interfaces/user.interface';
+import { FastifyReply } from 'fastify';
+import { SellersService } from './sellers.service';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { RolesGuard } from '../core/guards/roles.guard';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { ListSellers } from './dto/list-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
@@ -47,6 +35,12 @@ import { SaveStoreDataDto } from './dto/save-store-data.dto';
 import { SaveContactDataDto } from './dto/save-contact-data.dto';
 import { SaveAccountDataDto } from './dto/save-account-data.dto';
 import { SaveBusinessDataDto } from './dto/save-business-data.dto';
+import { DataStatus } from './enums/data-status.enum';
+import { Seller } from './types/seller';
+import { StoreData } from './types/store-data';
+import { ContactData } from './types/contact-data';
+import { AccountData } from './types/account-data';
+import { BusinessData } from './types/business-data';
 
 /**
  * Controller: Sellers
@@ -63,13 +57,18 @@ export class SellersController {
   /**
    * Constructor
    *
-   * @param userService Injected instance of UserService
-   * @param authService Injected instance of AuthService
+   * @param sellersService  Injected instance of SellersService
    */
-  constructor(
-    private readonly userService: UserService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly sellersService: SellersService) {}
+
+  /**
+   * GET /v1/sellers/hello/
+   */
+  @Get('hello')
+  hello() {
+    this.logger.log(`GET /v1/sellers/hello/`);
+    return this.sellersService.hello();
+  }
 
   /**
    * POST /v1/sellers/
@@ -79,24 +78,14 @@ export class SellersController {
   @Post()
   @ApiOperation({
     summary: '판매자 생성',
-    description: '핀메지를 생성한다.',
+    description: '판매자를 생성한다.',
   })
   @ApiCreatedResponse({ description: '정상 생성됨' })
   async create(@Body() createSellerDto: CreateSellerDto): Promise<void> {
     this.logger.log(`POST /v1/sellers/`);
     this.logger.log(`> body = ${JSON.stringify(createSellerDto)}`);
 
-    // 1. Get or create account
-    const { id: accountId } = await this.authService.getOrCreateAccount(
-      createSellerDto.email,
-      createSellerDto.password,
-    );
-
-    // 2. Create seller
-    const { id: sellerId } = await this.userService.createSeller(createSellerDto);
-
-    // 3. Link seller with account
-    await this.authService.updateAccount(accountId, { sellerId });
+    await this.sellersService.create(createSellerDto);
   }
 
   /**
@@ -105,19 +94,17 @@ export class SellersController {
    * @param query ListSellers
    */
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Staff, UserType.Seller)
   @ApiOperation({
     summary: '판매자 목록 및 검색',
     description: '판매자 목록을 가져오거나 검색한다.',
   })
-  @ApiOkResponse()
+  @ApiOkResponse({ description: '' })
   async find(@Query() query: ListSellers): Promise<void> {
     this.logger.log(`GET /v1/sellers/`);
     this.logger.log(`> query = ${JSON.stringify(query)}`);
 
     // TODO
-    // return await this.userService.listSellers(query);
+    // return await this.sellersService.find(query);
   }
 
   /**
@@ -135,7 +122,7 @@ export class SellersController {
   findOne(@Param('id') id: string): Promise<Seller> {
     this.logger.log(`GET /v1/sellers/${id}`);
 
-    return this.userService.getSeller(id);
+    return this.sellersService.findOne(id);
   }
 
   /**
@@ -146,8 +133,7 @@ export class SellersController {
    * @param updateSellerDto UpdateSellerDto
    */
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Admin, UserType.Staff)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '판매자 정보 수정',
     description: '판매자 정보를 수정한다.',
@@ -162,11 +148,7 @@ export class SellersController {
     this.logger.log(`PATCH /v1/sellers/${id}`);
     this.logger.log(`> body = ${JSON.stringify(updateSellerDto)}`);
 
-    if (updateSellerDto.password) {
-      const accountId = req.user.id;
-      await this.authService.updateAccount(accountId, { password: updateSellerDto.password });
-    }
-    await this.userService.updateSeller(id, updateSellerDto);
+    await this.sellersService.update(id, updateSellerDto);
   }
 
   /**
@@ -177,8 +159,7 @@ export class SellersController {
    * @param res Reply object
    */
   @Post(':id/upload')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Seller)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '파일 업로드',
     description: '판매자와 관련된 파일(이미지)를 업로드한다.',
@@ -202,7 +183,7 @@ export class SellersController {
   @ApiOkResponse({ description: '성공' })
   async uploadFiles(
     @Param('id') id: string,
-    @Req() req: FastifyRequest,
+    @Req() req: any,
     @Res() res: FastifyReply,
   ): Promise<void> {
     this.logger.log(`POST /v1/sellers/${'id'}/upload/`);
@@ -243,8 +224,7 @@ export class SellersController {
    * @param saveStoreDataDto  SaveStoreDataDto
    */
   @Put(':id/store-data')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Seller)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '스토어 정보 저장',
     description: '스토어 정보를 저장한다.',
@@ -258,11 +238,10 @@ export class SellersController {
     this.logger.log(`PUT /v1/sellers/${id}/store-data/`);
     this.logger.log(`> body = ${JSON.stringify(saveStoreDataDto)}`);
 
-    await this.userService.saveSellerStoreData(id, saveStoreDataDto);
-
-    const updateSellerDto = new UpdateSellerDto();
-    updateSellerDto.storeDataStatus = SellerDataStatus.Submitted;
-    await this.userService.updateSeller(id, updateSellerDto);
+    await this.sellersService.saveStoreData(id, saveStoreDataDto);
+    await this.sellersService.update(id, {
+      storeDataStatus: DataStatus.Submitted,
+    });
   }
 
   /**
@@ -276,10 +255,10 @@ export class SellersController {
     description: '스토어 정보를 가져온다.',
   })
   @ApiOkResponse({ description: '정상' })
-  async getStoreData(@Param('id') id: string): Promise<SellerStoreData> {
+  async getStoreData(@Param('id') id: string): Promise<StoreData> {
     this.logger.log(`GET /v1/sellers/${id}/store-data/`);
 
-    return await this.userService.getSellerStoreData(id);
+    return await this.sellersService.getStoreData(id);
   }
 
   /**
@@ -290,8 +269,7 @@ export class SellersController {
    * @param saveContactDataDto  SaveContactDataDto
    */
   @Put(':id/contact-data')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Seller)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '셀러 정보 저장',
     description: '셀러 정보를 저장한다.',
@@ -307,15 +285,10 @@ export class SellersController {
     this.logger.log(`PUT /v1/sellers/${id}/contact-data/`);
     this.logger.log(`> body = ${JSON.stringify(saveContactDataDto)}`);
 
-    if (req.user.id !== id) {
-      throw new ForbiddenException();
-    }
-
-    await this.userService.saveSellerContactData(id, saveContactDataDto);
-
-    const updateSellerDto = new UpdateSellerDto();
-    updateSellerDto.contactDataStatus = SellerDataStatus.Submitted;
-    await this.userService.updateSeller(id, updateSellerDto);
+    await this.sellersService.saveContactData(id, saveContactDataDto);
+    await this.sellersService.update(id, {
+      contactDataStatus: DataStatus.Submitted,
+    });
   }
 
   /**
@@ -329,15 +302,14 @@ export class SellersController {
     description: '셀러 정보를 가져온다.',
   })
   @ApiOkResponse({ description: '정상' })
-  async getContactData(@Param('id') id: string): Promise<SellerContactData> {
+  async getContactData(@Param('id') id: string): Promise<ContactData> {
     this.logger.log(`GET /v1/sellers/${id}/contact-data/`);
 
-    return await this.userService.getSellerContactData(id);
+    return await this.sellersService.getContactData(id);
   }
 
   @Put(':id/account-data')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Seller)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '정산 정보 저장',
     description: '정산 정보를 저장한다.',
@@ -351,11 +323,10 @@ export class SellersController {
     this.logger.log(`PUT /v1/sellers/${id}/account-data/`);
     this.logger.log(`> body = ${JSON.stringify(saveAccountDataDto)}`);
 
-    await this.userService.saveSellerAccountData(id, saveAccountDataDto);
-
-    const updateSellerDto = new UpdateSellerDto();
-    updateSellerDto.accountDataComment = SellerDataStatus.Submitted;
-    await this.userService.updateSeller(id, updateSellerDto);
+    await this.sellersService.saveAccountData(id, saveAccountDataDto);
+    await this.sellersService.update(id, {
+      accountDataStatus: DataStatus.Submitted,
+    });
   }
 
   @Get(':id/account-data')
@@ -364,15 +335,14 @@ export class SellersController {
     description: '정산 정보를 가져온다.',
   })
   @ApiOkResponse({ description: '정상' })
-  async getAccountData(@Param('id') id: string): Promise<SellerAccountData> {
+  async getAccountData(@Param('id') id: string): Promise<AccountData> {
     this.logger.log(`GET /v1/sellers/${id}/account-data/`);
 
-    return await this.userService.getSellerAccountData(id);
+    return await this.sellersService.getAccountData(id);
   }
 
   @Put(':id/business-data')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UserTypes(UserType.Seller)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '사업자 정보 저장',
     description: '사업자 정보를 저장한다.',
@@ -386,11 +356,10 @@ export class SellersController {
     this.logger.log(`PUT /v1/sellers/${id}/business-data/`);
     this.logger.log(`> body = ${JSON.stringify(saveBusinessDataDto)}`);
 
-    await this.userService.saveSellerBusinessData(id, saveBusinessDataDto);
-
-    const updateSellerDto = new UpdateSellerDto();
-    updateSellerDto.businessDataStatus = SellerDataStatus.Submitted;
-    await this.userService.updateSeller(id, updateSellerDto);
+    await this.sellersService.saveBusinessData(id, saveBusinessDataDto);
+    await this.sellersService.update(id, {
+      businessDataStatus: DataStatus.Submitted,
+    });
   }
 
   @Get(':id/business-data')
@@ -399,9 +368,9 @@ export class SellersController {
     description: '사업자 정보를 가져온다.',
   })
   @ApiOkResponse({ description: '정상' })
-  async getBusinessData(@Param('id') id: string): Promise<SellerBusinessData> {
+  async getBusinessData(@Param('id') id: string): Promise<BusinessData> {
     this.logger.log(`GET /v1/sellers/${id}/business-data/`);
 
-    return await this.userService.getSellerBusinessData(id);
+    return await this.sellersService.getBusinessData(id);
   }
 }

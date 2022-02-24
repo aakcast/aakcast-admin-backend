@@ -2,7 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../../auth/auth.service';
-import { User, UserType } from '../../proto/auth';
+import { UserType } from '../../auth/enums/user-type.enum';
+import { User } from '../../auth/types/user';
 
 /**
  * Passport strategy: Local

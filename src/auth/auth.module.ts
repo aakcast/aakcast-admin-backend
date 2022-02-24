@@ -21,7 +21,7 @@ import { AuthService } from './auth.service';
         options: {
           url: '0.0.0.0:7002',
           package: AAKCAST_AUTH_PACKAGE_NAME,
-          protoPath: [join(__dirname, 'proto/auth.proto')],
+          protoPath: [join(__dirname, '../proto/auth.proto')],
         },
       },
     ]),

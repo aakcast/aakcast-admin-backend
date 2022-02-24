@@ -31,7 +31,7 @@ message ServiceDescriptor {
 
 service Auth {
     // User
-    rpc FindUser(auth.FindUser) returns (auth.User);
+    rpc FindUser(auth.FindUserRequest) returns (auth.User);
     rpc ValidateUser(auth.ValidateUserRequest) returns (auth.User);
 
     // OTP (temporary credentials)
@@ -42,19 +42,14 @@ service Auth {
     rpc ResetPassword(auth.ResetPasswordRequest) returns (auth.Empty);
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Message definitions
-
-enum UserType {
-    Unknown = 0;
-    Staff = 1;
-    Seller = 2;
-    Temp = 3;
-}
-
 message User {
-    UserType type = 1;
+    enum Type {
+        STAFF = 0;
+        SELLER = 1;
+        TEMP = 2;
+    }
+
+    Type type = 1;
     string id = 2;
     string email = 3;
     bool is_admin = 4;
@@ -65,13 +60,13 @@ message Otp {
     string code = 1;
 }
 
-message FindUser {
-    UserType type = 1;
+message FindUserRequest {
+    User.Type type = 1;
     string email = 2;
 }
 
 message ValidateUserRequest {
-    UserType type = 1;
+    User.Type type = 1;
     string email = 2;
     string password = 3;
 }
@@ -89,7 +84,7 @@ message ValidateTemporaryCredentialsRequest {
 }
 
 message ResetPasswordRequest {
-    UserType type = 1;
+    User.Type type = 1;
     string email = 2;
     string password = 3;
 }

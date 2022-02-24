@@ -11,7 +11,7 @@ export class ListSellers {
     description: '조회할 페이지 번호',
     default: 1,
   })
-  page: number;
+  page?: number;
 
   @IsNumberString()
   @IsOptional()
@@ -19,7 +19,7 @@ export class ListSellers {
     description: '페이지에 표시할 최대 셀러 수',
     default: 20,
   })
-  limit: number;
+  limit?: number;
 
   @IsString()
   @IsOptional()
@@ -27,7 +27,7 @@ export class ListSellers {
     description: '정렬 기준 필드',
     default: 'joinedAt',
   })
-  sortField: string;
+  sortField?: string;
 
   @IsIn(['asc', 'desc'])
   @IsOptional()
@@ -36,7 +36,7 @@ export class ListSellers {
     description: '정렬 순서',
     default: 'asc',
   })
-  sortOrder: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc';
 
   @IsString()
   @IsOptional()

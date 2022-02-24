@@ -1,8 +1,15 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, AUTH_SERVICE_NAME, AppClient, AuthClient } from '../proto/auth';
-import { User, UserType } from './types/user';
+import {
+  APP_SERVICE_NAME,
+  AUTH_SERVICE_NAME,
+  AppClient,
+  AuthClient,
+  User_Type,
+} from '../proto/auth';
+import { UserType } from './enums/user-type.enum';
+import { User } from './types/user';
 import { Otp } from './types/otp';
 
 /**
@@ -47,12 +54,16 @@ export class AuthService implements OnModuleInit {
   /**
    * Find user by email
    *
-   * @param type      user type
-   * @param email     login email of user
+   * @param type  user type
+   * @param email login email of user
    */
   async findUser(type: UserType, email: string): Promise<User> {
-    const user$ = this.authClient.findUser({ type, email });
-    return await lastValueFrom(user$);
+    const res$ = this.authClient.findUser({
+      type: AuthService.convertUserType(type),
+      email,
+    });
+    const res = await lastValueFrom(res$);
+    return User.fromResponse(res);
   }
 
   /**
@@ -64,8 +75,13 @@ export class AuthService implements OnModuleInit {
    */
   async validateUser(type: UserType, email: string, password: string): Promise<User | null> {
     try {
-      const user$ = this.authClient.validateUser({ type, email, password });
-      return await lastValueFrom(user$);
+      const res$ = this.authClient.validateUser({
+        type: AuthService.convertUserType(type),
+        email,
+        password,
+      });
+      const res = await lastValueFrom(res$);
+      return User.fromResponse(res);
     } catch (e) {
       return null;
     }
@@ -77,12 +93,13 @@ export class AuthService implements OnModuleInit {
    * @param digits  length of OTP
    */
   async createTemporaryCredentials(mobile: string, digits = 6): Promise<Otp> {
-    const otp$ = this.authClient.createTemporaryCredentials({
+    const res$ = this.authClient.createTemporaryCredentials({
       mobile,
       digits,
       expires: new Date(Date.now() + 3 * 60 * 1000).toString(), // 3 minutes
     });
-    return await lastValueFrom(otp$);
+    const res = await lastValueFrom(res$);
+    return Otp.fromResponse(res);
   }
 
   /**
@@ -93,8 +110,13 @@ export class AuthService implements OnModuleInit {
    * @param email   email (give higher authorization level)
    */
   async validateTemporaryCredentials(mobile: string, code: string, email?: string): Promise<User> {
-    const user$ = this.authClient.validateTemporaryCredentials({ mobile, code, email });
-    return await lastValueFrom(user$);
+    const res$ = this.authClient.validateTemporaryCredentials({
+      mobile,
+      code,
+      email,
+    });
+    const res = await lastValueFrom(res$);
+    return User.fromResponse(res);
   }
 
   /**
@@ -105,7 +127,30 @@ export class AuthService implements OnModuleInit {
    * @param password  new password
    */
   async resetPassword(type: UserType, email: string, password: string): Promise<void> {
-    const empty$ = this.authClient.resetPassword({ type, email, password });
+    const empty$ = this.authClient.resetPassword({
+      type: AuthService.convertUserType(type),
+      email,
+      password,
+    });
     await lastValueFrom(empty$);
+  }
+
+  /**
+   * UserType -> User_Type
+   *
+   * @param type  UserType
+   * @private
+   */
+  private static convertUserType(type: UserType): User_Type {
+    switch (type) {
+      case UserType.Staff:
+        return User_Type.STAFF;
+      case UserType.Seller:
+        return User_Type.SELLER;
+      case UserType.Temp:
+        return User_Type.TEMP;
+      default:
+        throw new InternalServerErrorException();
+    }
   }
 }

@@ -20,20 +20,57 @@ import {
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiResponseSchemaHost,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { Role } from '../core/enum/role.enum';
-import { Roles } from '../core/decorators/role.decorator';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { RolesGuard } from '../core/guards/roles.guard';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UserType, User } from './types/user';
-import { EmailVerification } from './types/email-verification';
-import { TokenDescriptor } from './types/token-descriptor';
+import { UserType } from './enums/user-type.enum';
+import { User } from './types/user';
+
+const emailVerificationSchema: ApiResponseSchemaHost['schema'] = {
+  title: 'EmailVerification',
+  required: ['email', 'exists'],
+  properties: {
+    email: {
+      type: 'string',
+      description: '로그인 이메일',
+      example: 'mankiplayer@gmail.com',
+    },
+    exists: {
+      type: 'boolean',
+      description: '회원 가입 여부',
+      example: true,
+    },
+  },
+};
+
+const tokenDescriptorSchema: ApiResponseSchemaHost['schema'] = {
+  title: 'TokenDescriptor',
+  required: [],
+  properties: {
+    scheme: {
+      type: 'string',
+      description: '인증 방식',
+      example: 'bearer',
+    },
+    format: {
+      type: 'string',
+      description: '토큰 형식',
+      example: 'JWT',
+    },
+    token: {
+      type: 'string',
+      description: '토큰값 (Authorization 헤더에 설정하여 인증한다.)',
+      example:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+    },
+  },
+};
 
 /**
  * Controller: Auth
@@ -56,6 +93,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService, private readonly jwtService: JwtService) {}
 
   /**
+   * GET /v1/auth/hello/
+   */
+  @Get('hello')
+  hello() {
+    this.logger.log(`GET /v1/auth/hello/`);
+    return this.authService.hello();
+  }
+
+  /**
    * GET /v1/auth/verify-email/
    *
    * @param verifyEmailDto  VerifyEmailDto
@@ -65,8 +111,8 @@ export class AuthController {
     summary: '이메일 확인',
     description: '이메일의 가입 여부를 확인한다.',
   })
-  @ApiOkResponse({ description: '성공', type: EmailVerification })
-  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<EmailVerification> {
+  @ApiOkResponse({ description: '성공', schema: emailVerificationSchema })
+  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto) {
     this.logger.log(`GET /v1/auth/verify-email/`);
     this.logger.log(`> query = ${JSON.stringify(verifyEmailDto)}`);
 
@@ -110,9 +156,9 @@ export class AuthController {
       },
     },
   })
-  @ApiOkResponse({ description: '성공', type: TokenDescriptor })
+  @ApiOkResponse({ description: '성공', schema: tokenDescriptorSchema })
   @ApiUnauthorizedResponse({ description: '존재하지 않는 이메일 또는 비밀번호 불일치' })
-  login(@Req() req: any): TokenDescriptor {
+  login(@Req() req: any) {
     this.logger.log(`POST /v1/auth/login/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 
@@ -168,10 +214,12 @@ export class AuthController {
     description:
       '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이메일을 제공하여 로그인 한 경우 비밀번호 변경 권한이 주어지고 그렇지 않은 경우 계정 정보만 확인할 수 있다.',
   })
-  @ApiOkResponse({ description: '성공', type: TokenDescriptor })
-  @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없거나 또는 핸드폰가 일치하지 않음 (이메일 제공 시에만)' })
+  @ApiOkResponse({ description: '성공', schema: tokenDescriptorSchema })
+  @ApiNotFoundResponse({
+    description: '핸드폰 정보를 찾을 수 없거나 또는 핸드폰가 일치하지 않음 (이메일 제공 시에만)',
+  })
   @ApiUnauthorizedResponse({ description: '잘못된 인증번호이거나 인증 시간이 초과됨' })
-  async loginWithOtp(@Body() loginOtpDto: LoginOtpDto): Promise<TokenDescriptor> {
+  async loginWithOtp(@Body() loginOtpDto: LoginOtpDto) {
     this.logger.log(`POST /auth/login-otp/`);
     this.logger.log(`> body = ${JSON.stringify(loginOtpDto)}`);
 
@@ -197,8 +245,7 @@ export class AuthController {
    * @param resetPasswordDto  ResetPasswordDto
    */
   @Post('reset-password')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Temp)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: '이메일과 인증코드를 이용하여 비밀번호를 재설정한다.',

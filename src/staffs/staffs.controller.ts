@@ -20,13 +20,12 @@ import {
   ApiNoContentResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { UserService } from '../grpc-clients/services/user.service';
-import { AuthService } from '../grpc-clients/services/auth.service';
-import { Staff } from '../grpc-clients/interfaces/user.interface';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { StaffsService } from './staffs.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { ListStaffs } from './dto/list-staffs.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
+import { Staff } from './types/staff';
 
 /**
  * Controller: Staffs
@@ -35,20 +34,26 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 @ApiTags('Staffs')
 export class StaffsController {
   /**
-   * Constructor
-   *
-   * @param userService Injected instance of UserService
-   * @param authService Injected instance of AuthService
-   */
-  constructor(
-    private readonly userService: UserService,
-    private readonly authService: AuthService,
-  ) {}
-  /**
    * Logger instance
    * @private
    */
   private readonly logger = new Logger(StaffsController.name);
+
+  /**
+   * Constructor
+   *
+   * @param staffsService Injected instance of StaffsService
+   */
+  constructor(private readonly staffsService: StaffsService) {}
+
+  /**
+   * GET /v1/staffs/hello/
+   */
+  @Get('hello')
+  hello() {
+    this.logger.log(`GET /v1/staffs/hello/`);
+    return this.staffsService.hello();
+  }
 
   @Post()
   @ApiOperation({
@@ -60,17 +65,7 @@ export class StaffsController {
     this.logger.log(`POST /v1/staffs/`);
     this.logger.log(`> body = ${JSON.stringify(createStaffDto)}`);
 
-    // 1. Get or create account
-    const { id: accountId } = await this.authService.getOrCreateAccount(
-      createStaffDto.email,
-      createStaffDto.password,
-    );
-
-    // 2. Create staff
-    const { id: staffId } = await this.userService.createStaff(createStaffDto);
-
-    // 3. Link seller with account
-    await this.authService.updateAccount(accountId, { staffId });
+    await this.staffsService.create(createStaffDto);
   }
 
   @Get()
@@ -97,7 +92,7 @@ export class StaffsController {
   async findOne(@Param('id') id: string): Promise<Staff> {
     this.logger.log(`GET /v1/staffs/${id}`);
 
-    return await this.userService.getStaff(id);
+    return await this.staffsService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -112,11 +107,7 @@ export class StaffsController {
     this.logger.log(`PATCH /v1/staffs/${id}`);
     this.logger.log(`> body = ${JSON.stringify(updateStaffDto)}`);
 
-    if (updateStaffDto.password) {
-      const accountId = req.user.id;
-      await this.authService.updateAccount(accountId, { password: updateStaffDto.password });
-    }
-    await this.userService.updateStaff(id, updateStaffDto);
+    await this.staffsService.update(id, updateStaffDto);
   }
 
   // TODO: admin only
@@ -131,6 +122,6 @@ export class StaffsController {
   async delete(@Param('id') id: string): Promise<void> {
     this.logger.log(`DELETE /v1/staffs/${id}`);
 
-    await this.userService.deleteStaff(id);
+    await this.staffsService.delete(id);
   }
 }
