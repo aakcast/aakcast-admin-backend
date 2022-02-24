@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserType } from '../../grpc-clients/interfaces/auth.interface';
+import { UserType } from '../../proto/auth';
 import { USER_TYPES_KEY } from '../decorators/user-types.decorator';
 
 /**

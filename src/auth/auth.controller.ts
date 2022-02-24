@@ -1,8 +1,8 @@
 import {
   Controller,
-  UseGuards,
-  Post,
   Get,
+  Post,
+  UseGuards,
   HttpCode,
   Req,
   Query,
@@ -11,19 +11,17 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
-  ApiTags,
-  ApiOperation,
   ApiBearerAuth,
   ApiBody,
-  ApiOkResponse,
-  ApiNoContentResponse,
-  ApiUnauthorizedResponse,
-  ApiNotFoundResponse,
   ApiConflictResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UserService } from '../grpc-clients/services/user.service';
-import { AuthService } from '../grpc-clients/services/auth.service';
-import { UserType, User } from '../grpc-clients/interfaces/auth.interface';
+import { AuthService } from './auth.service';
 import { UserTypes } from '../core/decorators/user-types.decorator';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
@@ -32,6 +30,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UserType, User } from './types/user';
 import { EmailVerification } from './types/email-verification';
 import { TokenDescriptor } from './types/token-descriptor';
 
@@ -50,15 +49,10 @@ export class AuthController {
   /**
    * Constructor
    *
-   * @param userService Injected instance of UserService
    * @param authService Injected instance of AuthService
    * @param jwtService  Injected instance of JwtService
    */
-  constructor(
-    private readonly userService: UserService,
-    private readonly authService: AuthService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly authService: AuthService, private readonly jwtService: JwtService) {}
 
   /**
    * GET /v1/auth/verify-email/
@@ -78,7 +72,7 @@ export class AuthController {
     const { email } = verifyEmailDto;
 
     // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
-    const staff = await this.userService.findSeller({ email });
+    const staff = await this.authService.findUser(UserType.Seller, email);
 
     return {
       email,
@@ -104,7 +98,7 @@ export class AuthController {
       properties: {
         email: {
           type: 'string',
-          description: '로그인 ID (이메일)',
+          description: '로그인 이메일',
           example: 'mankiplayer@gmail.com',
         },
         password: {
@@ -156,7 +150,7 @@ export class AuthController {
     const otp = await this.authService.createTemporaryCredentials(mobile, digits);
     this.logger.log(`>> OTP created: ${mobile} [${otp.code}]`);
 
-    // TODO: to be triggered by event
+    // TODO: 일단 슬랙으로 보낸다
     // const message = `[aakcast] 인증번호는 [${code}] 입니다.`;
     // const empty$ = this.notificationService.sendSms({ mobile, message });
     // await lastValueFrom(empty$);
@@ -170,7 +164,8 @@ export class AuthController {
   @Post('login-otp')
   @ApiOperation({
     summary: '인증코드로 로그인',
-    description: '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이메일을 제공하여 로그인 한 경우 비밀번호 변경 권한이 주어지고 그렇지 않은 경우 계정 정보만 확인할 수 있다.',
+    description:
+      '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이메일을 제공하여 로그인 한 경우 비밀번호 변경 권한이 주어지고 그렇지 않은 경우 계정 정보만 확인할 수 있다.',
   })
   @ApiOkResponse({ description: '성공', type: TokenDescriptor })
   @ApiNotFoundResponse({ description: '핸드폰 정보를 찾을 수 없거나 또는 핸드폰가 일치하지 않음 (이메일 제공 시에만)' })
@@ -202,7 +197,7 @@ export class AuthController {
    */
   @Post('reset-password')
   @UseGuards(JwtAuthGuard, UserTypesGuard)
-  @UserTypes(UserType.TempAuthorizedLv2)
+  @UserTypes(UserType.Temp)
   @ApiOperation({
     summary: '비밀번호 재설정',
     description: '이메일과 인증코드를 이용하여 비밀번호를 재설정한다.',
@@ -216,8 +211,8 @@ export class AuthController {
     this.logger.log(`POST /auth/reset-password/`);
     this.logger.log(`> body = ${JSON.stringify(resetPasswordDto)}`);
 
-    const { id }: User = req.user;
+    const { type, email }: User = req.user;
 
-    await this.authService.resetPassword(id, resetPasswordDto.password);
+    await this.authService.resetPassword(type, email, resetPasswordDto.password);
   }
 }
