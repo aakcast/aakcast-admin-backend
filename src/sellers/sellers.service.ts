@@ -1,7 +1,7 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, USER_SERVICE_NAME, AppClient, UserClient } from 'proto/user';
+import { APP_SERVICE_NAME, USERS_SERVICE_NAME, AppClient, UsersClient } from 'proto/user';
 import { IdDto } from '../core/dto/id.dto';
 import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
@@ -30,10 +30,10 @@ export class SellersService implements OnModuleInit {
    */
   private appClient: AppClient;
   /**
-   * UserDto service client
+   * Users service client
    * @private
    */
-  private userClient: UserClient;
+  private usersClient: UsersClient;
 
   /**
    * Constructor
@@ -47,7 +47,7 @@ export class SellersService implements OnModuleInit {
    */
   onModuleInit() {
     this.appClient = this.userPackage.getService<AppClient>(APP_SERVICE_NAME);
-    this.userClient = this.userPackage.getService<UserClient>(USER_SERVICE_NAME);
+    this.usersClient = this.userPackage.getService<UsersClient>(USERS_SERVICE_NAME);
   }
 
   /**
@@ -65,7 +65,7 @@ export class SellersService implements OnModuleInit {
    * @return  ID of new seller
    */
   async create(createSellerDto: CreateSellerDto): Promise<IdDto> {
-    const res$ = this.userClient.createSeller(createSellerDto);
+    const res$ = this.usersClient.createSeller(createSellerDto);
     const res = await lastValueFrom(res$);
     return new IdDto(res);
   }
@@ -76,7 +76,7 @@ export class SellersService implements OnModuleInit {
    * @param findSellersDto  FindSellersDto
    */
   async find(findSellersDto: FindSellersDto): Promise<PaginatedDto<SellerDto>> {
-    const res$ = this.userClient.findSellers(findSellersDto);
+    const res$ = this.usersClient.findSellers(findSellersDto);
     const res = await lastValueFrom(res$);
     return new PaginatedDto(SellerDto, res);
   }
@@ -87,7 +87,7 @@ export class SellersService implements OnModuleInit {
    * @param id  Seller ID
    */
   async findOne(id: string): Promise<SellerDetailDto> {
-    const res$ = this.userClient.getSellerDetail({ id });
+    const res$ = this.usersClient.getSellerDetail({ id });
     const res = await lastValueFrom(res$);
     return new SellerDetailDto(res);
   }
@@ -99,7 +99,7 @@ export class SellersService implements OnModuleInit {
    * @param updateSellerDto UpdateSellerDto
    */
   async update(id: string, updateSellerDto: UpdateSellerDto): Promise<void> {
-    const empty$ = this.userClient.updateSeller({
+    const empty$ = this.usersClient.updateSeller({
       id,
       password: updateSellerDto.password,
       name: updateSellerDto.name,
@@ -130,7 +130,7 @@ export class SellersService implements OnModuleInit {
    * @param saveStoreDataDto  SaveStoreDataDto
    */
   async saveStoreData(id: string, saveStoreDataDto: SaveStoreDataDto): Promise<void> {
-    const empty$ = this.userClient.saveSellerStoreData({ id, ...saveStoreDataDto });
+    const empty$ = this.usersClient.saveSellerStoreData({ id, ...saveStoreDataDto });
     await lastValueFrom(empty$);
   }
 
@@ -140,7 +140,7 @@ export class SellersService implements OnModuleInit {
    * @param id  Seller ID
    */
   async getStoreData(id: string): Promise<StoreDataDto> {
-    const res$ = this.userClient.getSellerStoreData({ id });
+    const res$ = this.usersClient.getSellerStoreData({ id });
     const res = await lastValueFrom(res$);
     return new StoreDataDto(res);
   }
@@ -152,7 +152,7 @@ export class SellersService implements OnModuleInit {
    * @param saveContactDataDto  SaveContactDataDto
    */
   async saveContactData(id: string, saveContactDataDto: SaveContactDataDto): Promise<void> {
-    const empty$ = this.userClient.saveSellerContactData({ id, ...saveContactDataDto });
+    const empty$ = this.usersClient.saveSellerContactData({ id, ...saveContactDataDto });
     await lastValueFrom(empty$);
   }
 
@@ -162,7 +162,7 @@ export class SellersService implements OnModuleInit {
    * @param id  Seller ID
    */
   async getContactData(id: string): Promise<ContactDataDto> {
-    const res$ = this.userClient.getSellerContactData({ id });
+    const res$ = this.usersClient.getSellerContactData({ id });
     const res = await lastValueFrom(res$);
     return new ContactDataDto(res);
   }
@@ -174,7 +174,7 @@ export class SellersService implements OnModuleInit {
    * @param saveAccountDataDto  SaveAccountDataDto
    */
   async saveAccountData(id: string, saveAccountDataDto: SaveAccountDataDto): Promise<void> {
-    const empty$ = this.userClient.saveSellerAccountData({ id, ...saveAccountDataDto });
+    const empty$ = this.usersClient.saveSellerAccountData({ id, ...saveAccountDataDto });
     await lastValueFrom(empty$);
   }
 
@@ -184,7 +184,7 @@ export class SellersService implements OnModuleInit {
    * @param id  Seller ID
    */
   async getAccountData(id: string): Promise<AccountDataDto> {
-    const res$ = this.userClient.getSellerAccountData({ id });
+    const res$ = this.usersClient.getSellerAccountData({ id });
     const res = await lastValueFrom(res$);
     return new AccountDataDto(res);
   }
@@ -196,7 +196,7 @@ export class SellersService implements OnModuleInit {
    * @param saveBusinessDataDto SaveBusinessDataDto
    */
   async saveBusinessData(id: string, saveBusinessDataDto: SaveBusinessDataDto): Promise<void> {
-    const empty$ = this.userClient.saveSellerBusinessData({ id, ...saveBusinessDataDto });
+    const empty$ = this.usersClient.saveSellerBusinessData({ id, ...saveBusinessDataDto });
     await lastValueFrom(empty$);
   }
 
@@ -206,7 +206,7 @@ export class SellersService implements OnModuleInit {
    * @param id  Seller ID
    */
   async getBusinessData(id: string): Promise<BusinessDataDto> {
-    const res$ = this.userClient.getSellerBusinessData({ id });
+    const res$ = this.usersClient.getSellerBusinessData({ id });
     const res = await lastValueFrom(res$);
     return new BusinessDataDto(res);
   }

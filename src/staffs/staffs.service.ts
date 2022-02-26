@@ -1,7 +1,7 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, USER_SERVICE_NAME, AppClient, UserClient } from 'proto/user';
+import { APP_SERVICE_NAME, USERS_SERVICE_NAME, AppClient, UsersClient } from 'proto/user';
 import { IdDto } from '../core/dto/id.dto';
 import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';
@@ -20,10 +20,10 @@ export class StaffsService implements OnModuleInit {
    */
   private appClient: AppClient;
   /**
-   * UserDto service client
+   * Users service client
    * @private
    */
-  private userClient: UserClient;
+  private usersClient: UsersClient;
 
   /**
    * Constructor
@@ -37,7 +37,7 @@ export class StaffsService implements OnModuleInit {
    */
   onModuleInit() {
     this.appClient = this.userPackage.getService<AppClient>(APP_SERVICE_NAME);
-    this.userClient = this.userPackage.getService<UserClient>(USER_SERVICE_NAME);
+    this.usersClient = this.userPackage.getService<UsersClient>(USERS_SERVICE_NAME);
   }
 
   /**
@@ -54,7 +54,7 @@ export class StaffsService implements OnModuleInit {
    * @param createStaffDto  CreateStaffDto
    */
   async create(createStaffDto: CreateStaffDto): Promise<IdDto> {
-    const res$ = this.userClient.createStaff(createStaffDto);
+    const res$ = this.usersClient.createStaff(createStaffDto);
     const res = await lastValueFrom(res$);
     return new IdDto(res);
   }
@@ -65,7 +65,7 @@ export class StaffsService implements OnModuleInit {
    * @param findStaffsDto FindStaffsDto
    */
   async find(findStaffsDto: FindStaffsDto): Promise<PaginatedDto<StaffDto>> {
-    const res$ = this.userClient.findStaffs(findStaffsDto);
+    const res$ = this.usersClient.findStaffs(findStaffsDto);
     const res = await lastValueFrom(res$);
     return new PaginatedDto(StaffDto, res);
   }
@@ -76,7 +76,7 @@ export class StaffsService implements OnModuleInit {
    * @param id  Staff ID
    */
   async findOne(id: string): Promise<StaffDto> {
-    const res$ = this.userClient.getStaff({ id });
+    const res$ = this.usersClient.getStaff({ id });
     const res = await lastValueFrom(res$);
     return new StaffDto(res);
   }
@@ -88,7 +88,7 @@ export class StaffsService implements OnModuleInit {
    * @param updateStaffDto  UpdateStaffDto
    */
   async update(id: string, updateStaffDto: UpdateStaffDto): Promise<void> {
-    const empty$ = this.userClient.updateStaff({ id, ...updateStaffDto });
+    const empty$ = this.usersClient.updateStaff({ id, ...updateStaffDto });
     await lastValueFrom(empty$);
   }
 
@@ -98,7 +98,7 @@ export class StaffsService implements OnModuleInit {
    * @param id  Staff ID
    */
   async delete(id: string): Promise<void> {
-    const empty$ = this.userClient.deleteStaff({ id });
+    const empty$ = this.usersClient.deleteStaff({ id });
     await lastValueFrom(empty$);
   }
 }
