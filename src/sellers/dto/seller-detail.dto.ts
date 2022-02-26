@@ -1,6 +1,5 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { SellerDetail as SellerDetailResponse, SellerDetail_DataStatus } from '../../proto/user';
+import { SellerDetail as SellerDetailResponse } from 'proto/user';
 import { DataStatus } from '../enums/data-status.enum';
 import { SellerDto } from './seller.dto';
 
@@ -75,23 +74,21 @@ export class SellerDetailDto extends SellerDto {
   readonly businessDataComment: string;
 
   /**
-   * SellerDetail_DataStatus -> DataStatus
+   * string -> DataStatus
    *
    * @param status  Seller_DataStatus enum
    * @private
    */
-  private static convertDataStatus(status: SellerDetail_DataStatus): DataStatus {
+  private static convertDataStatus(status: string): DataStatus {
     switch (status) {
-      case SellerDetail_DataStatus.NONE:
-        return DataStatus.None;
-      case SellerDetail_DataStatus.SUBMITTED:
+      case 'submitted':
         return DataStatus.Submitted;
-      case SellerDetail_DataStatus.APPROVED:
+      case 'approved':
         return DataStatus.Approved;
-      case SellerDetail_DataStatus.REJECTED:
+      case 'rejected':
         return DataStatus.Rejected;
       default:
-        throw new InternalServerErrorException();
+        return DataStatus.None;
     }
   }
 }

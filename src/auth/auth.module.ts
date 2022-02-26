@@ -2,10 +2,9 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { join } from 'path';
+import { AAKCAST_AUTH_PACKAGE_NAME } from 'proto/auth';
 import { LocalStrategy } from '../core/strategies/local.strategy';
 import { JwtStrategy } from '../core/strategies/jwt.strategy';
-import { AAKCAST_AUTH_PACKAGE_NAME } from '../proto/auth';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -21,7 +20,7 @@ import { AuthService } from './auth.service';
         options: {
           url: '0.0.0.0:7002',
           package: AAKCAST_AUTH_PACKAGE_NAME,
-          protoPath: [join(__dirname, '../proto/auth.proto')],
+          protoPath: ['proto/auth.proto'],
         },
       },
     ]),

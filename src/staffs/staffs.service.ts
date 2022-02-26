@@ -1,7 +1,7 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, USER_SERVICE_NAME, AppClient, UserClient } from '../proto/user';
+import { APP_SERVICE_NAME, USER_SERVICE_NAME, AppClient, UserClient } from 'proto/user';
 import { IdDto } from '../core/dto/id.dto';
 import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';

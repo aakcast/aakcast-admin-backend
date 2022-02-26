@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SellerStoreData } from '../../proto/user';
+import { SellerStoreData } from 'proto/user';
 
 /**
  * DTO: StoreData

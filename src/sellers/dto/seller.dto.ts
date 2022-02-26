@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Seller as SellerResponse } from '../../proto/user';
+import { Seller as SellerResponse } from 'proto/user';
 
 /**
  * DTO: Seller
@@ -15,7 +15,7 @@ export class SellerDto {
     this.email = response.email;
     this.name = response.name;
     this.mobile = response.mobile;
-    this.joinedAt = new Date(response.createdAt);
+    this.joinedAt = response.createdAt as Date;
   }
 
   @ApiProperty({

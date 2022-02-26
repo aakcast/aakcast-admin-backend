@@ -1,13 +1,7 @@
-import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import {
-  APP_SERVICE_NAME,
-  USER_SERVICE_NAME,
-  AppClient,
-  UserClient,
-  SellerDetail_DataStatus,
-} from '../proto/user';
+import { APP_SERVICE_NAME, USER_SERVICE_NAME, AppClient, UserClient } from 'proto/user';
 import { IdDto } from '../core/dto/id.dto';
 import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
@@ -218,23 +212,19 @@ export class SellersService implements OnModuleInit {
   }
 
   /**
-   * DataStatus -> SellerDetail_DataStatus
+   * DataStatus -> string
    *
    * @param dataStatus  DataStatus enum
    * @private
    */
-  private static convertDataStatus(dataStatus: DataStatus): SellerDetail_DataStatus {
+  private static convertDataStatus(dataStatus: DataStatus): string {
     switch (dataStatus) {
-      case DataStatus.None:
-        return SellerDetail_DataStatus.NONE;
       case DataStatus.Submitted:
-        return SellerDetail_DataStatus.SUBMITTED;
       case DataStatus.Approved:
-        return SellerDetail_DataStatus.APPROVED;
       case DataStatus.Rejected:
-        return SellerDetail_DataStatus.REJECTED;
+        return dataStatus;
       default:
-        throw new InternalServerErrorException();
+        return '';
     }
   }
 }

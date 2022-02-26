@@ -1,13 +1,7 @@
 import { Inject, Injectable, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import {
-  APP_SERVICE_NAME,
-  AUTH_SERVICE_NAME,
-  AppClient,
-  AuthClient,
-  User_Type,
-} from '../proto/auth';
+import { APP_SERVICE_NAME, AUTH_SERVICE_NAME, AppClient, AuthClient, User_Type } from 'proto/auth';
 import { UserType } from './enums/user-type.enum';
 import { UserDto } from './dto/user.dto';
 import { OtpDto } from './dto/otp.dto';

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Staff as StaffResponse } from '../../proto/user';
+import { Staff as StaffResponse } from 'proto/user';
 
 /**
  * DTO: Staff
@@ -17,7 +17,7 @@ export class StaffDto {
     this.mobile = response.mobile;
     this.department = response.department;
     this.isAdmin = response.isAdmin;
-    this.joinedAt = new Date(response.createdAt);
+    this.joinedAt = response.createdAt as Date;
     this.active = !response.deletedAt;
   }
 

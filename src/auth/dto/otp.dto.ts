@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
-import { Otp as OtpResponse } from '../../proto/auth';
+import { Otp as OtpResponse } from 'proto/auth';
 
 /**
  * Type: OtpDto

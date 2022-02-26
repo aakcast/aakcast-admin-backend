@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build-proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=. --ts_proto_opt=nestJs=true --ts_proto_opt=esModuleInterop=true --ts_proto_opt=unrecognizedEnum=false src/proto/*.proto",
+    "build-proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=. --ts_proto_opt=nestJs=true --ts_proto_opt=esModuleInterop=true --ts_proto_opt=useOptionals=messages --ts_proto_opt=useDate=true --ts_proto_opt=unrecognizedEnum=false proto/*.proto",
     "build": "npm run build-proto && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

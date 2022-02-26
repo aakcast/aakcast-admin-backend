@@ -1,0 +1,90 @@
+syntax = "proto3";
+package aakcast.auth;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Common message definitions
+
+message Empty {}
+
+message Id {
+    string id = 1;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// AppService & message definitions
+
+service App {
+    // Hello
+    rpc Hello(auth.Empty) returns (auth.ServiceDescriptor);
+}
+
+message ServiceDescriptor {
+    string service = 1;
+    string version = 2;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// AuthService & message definitions
+
+service Auth {
+    // User
+    rpc FindUser(auth.FindUserRequest) returns (auth.User);
+    rpc ValidateUser(auth.ValidateUserRequest) returns (auth.User);
+
+    // OTP (temporary credentials)
+    rpc CreateTemporaryCredentials(auth.CreateTemporaryCredentialsRequest) returns (auth.Otp);
+    rpc ValidateTemporaryCredentials(auth.ValidateTemporaryCredentialsRequest) returns (auth.User);
+
+    // Password manipulation
+    rpc ResetPassword(auth.ResetPasswordRequest) returns (auth.Empty);
+}
+
+message User {
+    enum Type {
+        STAFF = 0;
+        SELLER = 1;
+        TEMP = 2;
+    }
+
+    Type type = 1;
+    string id = 2;
+    string email = 3;
+    bool is_admin = 4;
+    string created_at = 5;
+}
+
+message Otp {
+    string code = 1;
+}
+
+message FindUserRequest {
+    User.Type type = 1;
+    string email = 2;
+}
+
+message ValidateUserRequest {
+    User.Type type = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message CreateTemporaryCredentialsRequest {
+    string mobile = 1;
+    uint32 digits = 2;
+    optional string expires = 3;
+}
+
+message ValidateTemporaryCredentialsRequest {
+    string mobile = 1;
+    string code = 2;
+    optional string email = 3;
+}
+
+message ResetPasswordRequest {
+    User.Type type = 1;
+    string email = 2;
+    string password = 3;
+}

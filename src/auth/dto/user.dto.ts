@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { User as UserResponse, User_Type } from '../../proto/auth';
+import { User as UserResponse, User_Type } from 'proto/auth';
 import { UserType } from '../enums/user-type.enum';
 
 /**
