@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
-import { User } from './auth/types/user';
+import { UserDto } from './auth/dto/user.dto';
 
 /**
  * Controller: App(root)
@@ -60,7 +60,7 @@ export class AppController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: '성공' })
   @ApiUnauthorizedResponse({ description: '로그인되지 않음' })
-  getProfile(@Req() req: any): User {
+  getProfile(@Req() req: any): UserDto {
     this.logger.log(`GET /v1/profile/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 

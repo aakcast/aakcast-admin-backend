@@ -1,3 +1,6 @@
+/**
+ * Enum: DataStatus
+ */
 export enum DataStatus {
   None = 'none',
   Submitted = 'submitted',

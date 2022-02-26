@@ -2,30 +2,30 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNumberString, IsIn, IsOptional } from 'class-validator';
 
 /**
- * Query: ListSellers
+ * DTO: Find
  */
-export class ListSellers {
+export class FindDto {
   @IsNumberString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: '조회할 페이지 번호',
-    default: 1,
+    description: '반환할 결과 수',
+    default: 10,
   })
-  page?: number;
+  limit: number;
 
   @IsNumberString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: '페이지에 표시할 최대 셀러 수',
-    default: 20,
+    description: '반환할 시작 위치',
+    default: 0,
   })
-  limit?: number;
+  offset: number;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: '정렬 기준 필드',
-    default: 'joinedAt',
+    default: 'createdAt',
   })
   sortField?: string;
 

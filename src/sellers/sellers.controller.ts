@@ -25,22 +25,26 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { ApiPaginatedResponse } from '../core/decorators/api-response.decorator';
 import { FastifyReply } from 'fastify';
 import { SellersService } from './sellers.service';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { IdDto } from '../core/dto/id.dto';
+import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
-import { ListSellers } from './dto/list-sellers.dto';
+import { FindSellersDto } from './dto/find-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
 import { SaveStoreDataDto } from './dto/save-store-data.dto';
 import { SaveContactDataDto } from './dto/save-contact-data.dto';
 import { SaveAccountDataDto } from './dto/save-account-data.dto';
 import { SaveBusinessDataDto } from './dto/save-business-data.dto';
+import { SellerDto } from './dto/seller.dto';
+import { SellerDetailDto } from './dto/seller-detail.dto';
+import { StoreDataDto } from './dto/store-data.dto';
+import { ContactDataDto } from './dto/contact-data.dto';
+import { AccountDataDto } from './dto/account-data.dto';
+import { BusinessDataDto } from './dto/business-data.dto';
 import { DataStatus } from './enums/data-status.enum';
-import { Seller } from './types/seller';
-import { StoreData } from './types/store-data';
-import { ContactData } from './types/contact-data';
-import { AccountData } from './types/account-data';
-import { BusinessData } from './types/business-data';
 
 /**
  * Controller: Sellers
@@ -78,48 +82,47 @@ export class SellersController {
   @Post()
   @ApiOperation({
     summary: '판매자 생성',
-    description: '판매자를 생성한다.',
+    description: '판매자 계정을 생성한다.',
   })
-  @ApiCreatedResponse({ description: '정상 생성됨' })
-  async create(@Body() createSellerDto: CreateSellerDto): Promise<void> {
+  @ApiCreatedResponse({ description: '정상 생성됨', type: IdDto })
+  create(@Body() createSellerDto: CreateSellerDto): Promise<IdDto> {
     this.logger.log(`POST /v1/sellers/`);
     this.logger.log(`> body = ${JSON.stringify(createSellerDto)}`);
 
-    await this.sellersService.create(createSellerDto);
+    return this.sellersService.create(createSellerDto);
   }
 
   /**
    * GET /v1/sellers/
    *
-   * @param query ListSellers
+   * @param findSellersDto  FindSellersDto
    */
   @Get()
   @ApiOperation({
     summary: '판매자 목록 및 검색',
     description: '판매자 목록을 가져오거나 검색한다.',
   })
-  @ApiOkResponse({ description: '' })
-  async find(@Query() query: ListSellers): Promise<void> {
+  @ApiPaginatedResponse(SellerDto)
+  find(@Query() findSellersDto: FindSellersDto): Promise<PaginatedDto<SellerDto>> {
     this.logger.log(`GET /v1/sellers/`);
-    this.logger.log(`> query = ${JSON.stringify(query)}`);
+    this.logger.log(`> query = ${JSON.stringify(findSellersDto)}`);
 
-    // TODO
-    // return await this.sellersService.find(query);
+    return this.sellersService.find(findSellersDto);
   }
 
   /**
-   * GET /v1/sellers/:id/
+   * GET /v1/sellers/{id}/
    *
-   * @param id  Seller ID
+   * @param id  SellerDto ID
    */
   @Get(':id')
   @ApiOperation({
     summary: '판매자 정보 상세',
     description: '판매자 정보를 가져온다.',
   })
-  @ApiOkResponse({ description: '정상' })
+  @ApiOkResponse({ description: '정상', type: SellerDetailDto })
   @ApiNotFoundResponse({ description: '판매자 정보를 찾을 수 없음' })
-  findOne(@Param('id') id: string): Promise<Seller> {
+  findOne(@Param('id') id: string): Promise<SellerDetailDto> {
     this.logger.log(`GET /v1/sellers/${id}`);
 
     return this.sellersService.findOne(id);
@@ -129,7 +132,7 @@ export class SellersController {
    * PATCH /v1
    *
    * @param req             Request object
-   * @param id              Seller ID
+   * @param id              SellerDto ID
    * @param updateSellerDto UpdateSellerDto
    */
   @Patch(':id')
@@ -152,9 +155,9 @@ export class SellersController {
   }
 
   /**
-   * POST /v1/sellers/:id/upload/
+   * POST /v1/sellers/{id}/upload/
    *
-   * @param id  Seller ID
+   * @param id  SellerDto ID
    * @param req Request object
    * @param res Reply object
    */
@@ -218,9 +221,9 @@ export class SellersController {
   }
 
   /**
-   * PUT /v1/sellers/:id/store-data/
+   * PUT /v1/sellers/{id}/store-data/
    *
-   * @param id                Seller ID
+   * @param id                SellerDto ID
    * @param saveStoreDataDto  SaveStoreDataDto
    */
   @Put(':id/store-data')
@@ -231,6 +234,7 @@ export class SellersController {
   })
   @ApiBearerAuth()
   @ApiNoContentResponse({ description: '정상 처리됨' })
+  @ApiForbiddenResponse({ description: '다른 판매자 정보에 대한 수정 요청' })
   async saveStoreData(
     @Param('id') id: string,
     @Body() saveStoreDataDto: SaveStoreDataDto,
@@ -245,27 +249,28 @@ export class SellersController {
   }
 
   /**
-   * GET /v1/sellers/:id/store-data/
+   * GET /v1/sellers/{id}/store-data/
    *
-   * @param id  Seller ID
+   * @param id  SellerDto ID
    */
   @Get(':id/store-data')
   @ApiOperation({
     summary: '스토어 정보 상세',
     description: '스토어 정보를 가져온다.',
   })
-  @ApiOkResponse({ description: '정상' })
-  async getStoreData(@Param('id') id: string): Promise<StoreData> {
+  @ApiOkResponse({ description: '정상', type: StoreDataDto })
+  @ApiNotFoundResponse({ description: '스토어 정보가 존재하지 않음' })
+  getStoreData(@Param('id') id: string): Promise<StoreDataDto> {
     this.logger.log(`GET /v1/sellers/${id}/store-data/`);
 
-    return await this.sellersService.getStoreData(id);
+    return this.sellersService.getStoreData(id);
   }
 
   /**
-   * PUT /v1/sellers/:id/contact-data/
+   * PUT /v1/sellers/{id}/contact-data/
    *
    * @param req                 Request object
-   * @param id                  Seller ID
+   * @param id                  SellerDto ID
    * @param saveContactDataDto  SaveContactDataDto
    */
   @Put(':id/contact-data')
@@ -292,20 +297,21 @@ export class SellersController {
   }
 
   /**
-   * GET /v1/sellers/:id/contact-data/
+   * GET /v1/sellers/{id}/contact-data/
    *
-   * @param id  Seller ID
+   * @param id  SellerDto ID
    */
   @Get(':id/contact-data')
   @ApiOperation({
     summary: '셀러 정보 상세',
     description: '셀러 정보를 가져온다.',
   })
-  @ApiOkResponse({ description: '정상' })
-  async getContactData(@Param('id') id: string): Promise<ContactData> {
+  @ApiOkResponse({ description: '정상', type: ContactDataDto })
+  @ApiNotFoundResponse({ description: '셀러 정보가 존재하지 않음' })
+  getContactData(@Param('id') id: string): Promise<ContactDataDto> {
     this.logger.log(`GET /v1/sellers/${id}/contact-data/`);
 
-    return await this.sellersService.getContactData(id);
+    return this.sellersService.getContactData(id);
   }
 
   @Put(':id/account-data')
@@ -316,6 +322,7 @@ export class SellersController {
   })
   @ApiBearerAuth()
   @ApiNoContentResponse({ description: '정상 처리됨' })
+  @ApiForbiddenResponse({ description: '다른 판매자 정보에 대한 수정 요청' })
   async saveAccountData(
     @Param('id') id: string,
     @Body() saveAccountDataDto: SaveAccountDataDto,
@@ -334,11 +341,12 @@ export class SellersController {
     summary: '정산 정보 상세',
     description: '정산 정보를 가져온다.',
   })
-  @ApiOkResponse({ description: '정상' })
-  async getAccountData(@Param('id') id: string): Promise<AccountData> {
+  @ApiOkResponse({ description: '정상', type: AccountDataDto })
+  @ApiNotFoundResponse({ description: '정산 정보가 존재하지 않음' })
+  getAccountData(@Param('id') id: string): Promise<AccountDataDto> {
     this.logger.log(`GET /v1/sellers/${id}/account-data/`);
 
-    return await this.sellersService.getAccountData(id);
+    return this.sellersService.getAccountData(id);
   }
 
   @Put(':id/business-data')
@@ -349,6 +357,7 @@ export class SellersController {
   })
   @ApiBearerAuth()
   @ApiNoContentResponse({ description: '정상 처리됨' })
+  @ApiForbiddenResponse({ description: '다른 판매자 정보에 대한 수정 요청' })
   async saveBusinessData(
     @Param('id') id: string,
     @Body() saveBusinessDataDto: SaveBusinessDataDto,
@@ -367,10 +376,11 @@ export class SellersController {
     summary: '사업자 정보 상세',
     description: '사업자 정보를 가져온다.',
   })
-  @ApiOkResponse({ description: '정상' })
-  async getBusinessData(@Param('id') id: string): Promise<BusinessData> {
+  @ApiOkResponse({ description: '정상', type: BusinessDataDto })
+  @ApiNotFoundResponse({ description: '사업자 정보가 존재하지 않음' })
+  getBusinessData(@Param('id') id: string): Promise<BusinessDataDto> {
     this.logger.log(`GET /v1/sellers/${id}/business-data/`);
 
-    return await this.sellersService.getBusinessData(id);
+    return this.sellersService.getBusinessData(id);
   }
 }

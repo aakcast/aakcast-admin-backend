@@ -1,6 +1,6 @@
 // import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 // import { Reflector } from '@nestjs/core';
-// import { UserType } from '../../auth/types/user';
+// import { UserType } from '../../auth/dto/user';
 // import { Role } from '../enum/role.enum';
 // import { ROLES_KEY } from '../decorators/role.decorator';
 //
@@ -24,11 +24,11 @@
 //     return allowedRoles.some((role) => {
 //       switch (role) {
 //         case Role.Admin:
-//           return user?.role === UserType.Staff && user?.isAdmin;
-//         case Role.Staff:
-//           return user?.role === UserType.Staff;
-//         case Role.Seller:
-//           return user?.role === UserType.Seller;
+//           return user?.role === UserType.StaffDto && user?.isAdmin;
+//         case Role.StaffDto:
+//           return user?.role === UserType.StaffDto;
+//         case Role.SellerDto:
+//           return user?.role === UserType.SellerDto;
 //         case Role.Temp:
 //           return user?.role === UserType.Temp;
 //         default:

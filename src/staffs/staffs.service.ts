@@ -2,9 +2,12 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { APP_SERVICE_NAME, USER_SERVICE_NAME, AppClient, UserClient } from '../proto/user';
+import { IdDto } from '../core/dto/id.dto';
+import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';
-import { UpdateSellerDto } from '../sellers/dto/update-seller-dto';
-import { Staff } from './types/staff';
+import { FindStaffsDto } from './dto/find-staffs.dto';
+import { UpdateStaffDto } from './dto/update-staff.dto';
+import { StaffDto } from './dto/staff.dto';
 
 /**
  * Service: Staffs
@@ -17,7 +20,7 @@ export class StaffsService implements OnModuleInit {
    */
   private appClient: AppClient;
   /**
-   * User service client
+   * UserDto service client
    * @private
    */
   private userClient: UserClient;
@@ -40,28 +43,60 @@ export class StaffsService implements OnModuleInit {
   /**
    * Hello
    */
-  async hello() {
+  hello() {
     const svc$ = this.appClient.hello({});
-    return await lastValueFrom(svc$);
+    return lastValueFrom(svc$);
   }
 
-  async create(createStaffDto: CreateStaffDto): Promise<string> {
-    const res$ = this.userClient.createSeller(createStaffDto);
-    const { id } = await lastValueFrom(res$);
-    return id;
+  /**
+   * Create new staff
+   *
+   * @param createStaffDto  CreateStaffDto
+   */
+  async create(createStaffDto: CreateStaffDto): Promise<IdDto> {
+    const res$ = this.userClient.createStaff(createStaffDto);
+    const res = await lastValueFrom(res$);
+    return new IdDto(res);
   }
 
-  async findOne(id: string): Promise<Staff> {
+  /**
+   * Find staffs
+   *
+   * @param findStaffsDto FindStaffsDto
+   */
+  async find(findStaffsDto: FindStaffsDto): Promise<PaginatedDto<StaffDto>> {
+    const res$ = this.userClient.findStaffs(findStaffsDto);
+    const res = await lastValueFrom(res$);
+    return new PaginatedDto(StaffDto, res);
+  }
+
+  /**
+   * Find a staff by ID
+   *
+   * @param id  Staff ID
+   */
+  async findOne(id: string): Promise<StaffDto> {
     const res$ = this.userClient.getStaff({ id });
     const res = await lastValueFrom(res$);
-    return Staff.fromResponse(res);
+    return new StaffDto(res);
   }
 
-  async update(id: string, updateStaffDto: UpdateSellerDto): Promise<void> {
+  /**
+   * Update existing staff
+   *
+   * @param id              Staff ID
+   * @param updateStaffDto  UpdateStaffDto
+   */
+  async update(id: string, updateStaffDto: UpdateStaffDto): Promise<void> {
     const empty$ = this.userClient.updateStaff({ id, ...updateStaffDto });
     await lastValueFrom(empty$);
   }
 
+  /**
+   * (Soft) delete existing staff
+   *
+   * @param id  Staff ID
+   */
   async delete(id: string): Promise<void> {
     const empty$ = this.userClient.deleteStaff({ id });
     await lastValueFrom(empty$);

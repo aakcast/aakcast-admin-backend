@@ -9,8 +9,8 @@ import {
   User_Type,
 } from '../proto/auth';
 import { UserType } from './enums/user-type.enum';
-import { User } from './types/user';
-import { Otp } from './types/otp';
+import { UserDto } from './dto/user.dto';
+import { OtpDto } from './dto/otp.dto';
 
 /**
  * Service: Auth
@@ -46,9 +46,9 @@ export class AuthService implements OnModuleInit {
   /**
    * Hello
    */
-  async hello() {
+  hello() {
     const svc$ = this.appClient.hello({});
-    return await lastValueFrom(svc$);
+    return lastValueFrom(svc$);
   }
 
   /**
@@ -57,13 +57,13 @@ export class AuthService implements OnModuleInit {
    * @param type  user type
    * @param email login email of user
    */
-  async findUser(type: UserType, email: string): Promise<User> {
+  async findUser(type: UserType, email: string): Promise<UserDto> {
     const res$ = this.authClient.findUser({
       type: AuthService.convertUserType(type),
       email,
     });
     const res = await lastValueFrom(res$);
-    return User.fromResponse(res);
+    return new UserDto(res);
   }
 
   /**
@@ -73,7 +73,7 @@ export class AuthService implements OnModuleInit {
    * @param email     login email of user
    * @param password  login password of user
    */
-  async validateUser(type: UserType, email: string, password: string): Promise<User | null> {
+  async validateUser(type: UserType, email: string, password: string): Promise<UserDto | null> {
     try {
       const res$ = this.authClient.validateUser({
         type: AuthService.convertUserType(type),
@@ -81,7 +81,7 @@ export class AuthService implements OnModuleInit {
         password,
       });
       const res = await lastValueFrom(res$);
-      return User.fromResponse(res);
+      return new UserDto(res);
     } catch (e) {
       return null;
     }
@@ -89,17 +89,18 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Issue OTP for temporary login
+   *
    * @param mobile  mobile number of user
    * @param digits  length of OTP
    */
-  async createTemporaryCredentials(mobile: string, digits = 6): Promise<Otp> {
+  async createTemporaryCredentials(mobile: string, digits = 6): Promise<OtpDto> {
     const res$ = this.authClient.createTemporaryCredentials({
       mobile,
       digits,
       expires: new Date(Date.now() + 3 * 60 * 1000).toString(), // 3 minutes
     });
     const res = await lastValueFrom(res$);
-    return Otp.fromResponse(res);
+    return OtpDto.fromResponse(res);
   }
 
   /**
@@ -109,14 +110,18 @@ export class AuthService implements OnModuleInit {
    * @param code    OTP
    * @param email   email (give higher authorization level)
    */
-  async validateTemporaryCredentials(mobile: string, code: string, email?: string): Promise<User> {
+  async validateTemporaryCredentials(
+    mobile: string,
+    code: string,
+    email?: string,
+  ): Promise<UserDto> {
     const res$ = this.authClient.validateTemporaryCredentials({
       mobile,
       code,
       email,
     });
     const res = await lastValueFrom(res$);
-    return User.fromResponse(res);
+    return new UserDto(res);
   }
 
   /**

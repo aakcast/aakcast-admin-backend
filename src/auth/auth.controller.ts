@@ -30,15 +30,15 @@ import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserType } from './enums/user-type.enum';
-import { User } from './types/user';
+import { UserDto } from './dto/user.dto';
 
+/** Schema object - EmailVerification */
 const emailVerificationSchema: ApiResponseSchemaHost['schema'] = {
   title: 'EmailVerification',
   required: ['email', 'exists'],
   properties: {
     email: {
       type: 'string',
-      description: '로그인 이메일',
       example: 'mankiplayer@gmail.com',
     },
     exists: {
@@ -49,6 +49,7 @@ const emailVerificationSchema: ApiResponseSchemaHost['schema'] = {
   },
 };
 
+/** Schema object - TokenDescriptor */
 const tokenDescriptorSchema: ApiResponseSchemaHost['schema'] = {
   title: 'TokenDescriptor',
   required: [],
@@ -96,6 +97,10 @@ export class AuthController {
    * GET /v1/auth/hello/
    */
   @Get('hello')
+  @ApiOperation({
+    summary: 'Hello',
+    description: 'API의 상태를 확인한다.',
+  })
   hello() {
     this.logger.log(`GET /v1/auth/hello/`);
     return this.authService.hello();
@@ -145,7 +150,7 @@ export class AuthController {
       properties: {
         email: {
           type: 'string',
-          description: '로그인 이메일',
+          description: '로그인 ID',
           example: 'mankiplayer@gmail.com',
         },
         password: {
@@ -162,7 +167,7 @@ export class AuthController {
     this.logger.log(`POST /v1/auth/login/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 
-    const { id: sub, ...data }: User = req.user;
+    const { id: sub, ...data }: UserDto = req.user;
     const token = this.jwtService.sign({ sub, ...data });
     this.logger.log(`>> token generated: ${token}`);
 
@@ -259,7 +264,7 @@ export class AuthController {
     this.logger.log(`POST /auth/reset-password/`);
     this.logger.log(`> body = ${JSON.stringify(resetPasswordDto)}`);
 
-    const { type, email }: User = req.user;
+    const { type, email }: UserDto = req.user;
 
     await this.authService.resetPassword(type, email, resetPasswordDto.password);
   }

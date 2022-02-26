@@ -1,4 +1,12 @@
-import { IsBoolean, IsString, IsUrl, IsEmail, IsMobilePhone, IsNotEmpty } from 'class-validator';
+import {
+  IsBoolean,
+  IsString,
+  IsUrl,
+  IsEmail,
+  IsMobilePhone,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 
 /**
  * DTO: SaveBusinessData
@@ -38,9 +46,9 @@ export class SaveBusinessDataDto {
 
   @IsUrl()
   @IsNotEmpty()
-  bizRegImageUrl: string;
+  bizRegImageUrl1: string;
 
   @IsUrl()
-  @IsNotEmpty()
-  mailOrderRegImageUrl: string;
+  @IsOptional()
+  bizRegImageUrl2: string;
 }

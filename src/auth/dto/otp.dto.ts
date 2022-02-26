@@ -3,11 +3,11 @@ import { plainToClass } from 'class-transformer';
 import { Otp as OtpResponse } from '../../proto/auth';
 
 /**
- * Type: Otp
+ * Type: OtpDto
  */
-export class Otp {
-  static fromResponse(response: OtpResponse): Otp {
-    return plainToClass(Otp, response);
+export class OtpDto {
+  static fromResponse(response: OtpResponse): OtpDto {
+    return plainToClass(OtpDto, response);
   }
 
   @ApiProperty({

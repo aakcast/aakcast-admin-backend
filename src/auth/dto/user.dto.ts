@@ -1,19 +1,23 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { plainToClass } from 'class-transformer';
 import { User as UserResponse, User_Type } from '../../proto/auth';
 import { UserType } from '../enums/user-type.enum';
 
 /**
- * Type: User
+ * DTO: User
  */
-export class User {
-  static fromResponse(response: UserResponse): User {
-    return plainToClass(User, {
-      ...response,
-      type: User.convertUserType(response.type),
-      joinedAt: new Date(response.joinedAt),
-    });
+export class UserDto {
+  /**
+   * Constructor
+   *
+   * @param response  UserResponse
+   */
+  constructor(response: UserResponse) {
+    this.type = UserDto.convertUserType(response.type);
+    this.id = response.id;
+    this.email = response.email;
+    this.isAdmin = response.isAdmin;
+    this.joinedAt = new Date(response.createdAt);
   }
 
   @ApiProperty({
@@ -24,7 +28,7 @@ export class User {
 
   @ApiProperty({
     description: '사용자 ID',
-    example: '',
+    example: '1ab09a32-b489-4c31-afe8-685770e4a9cf',
   })
   readonly id: string;
 
@@ -41,15 +45,15 @@ export class User {
   readonly isAdmin: boolean;
 
   @ApiProperty({
-    description: '가입일',
-    example: '',
+    description: '가입일시',
+    example: new Date('2022-01-01T00:00:00Z'),
   })
   readonly joinedAt: Date;
 
   /**
-   * UserType -> User_Type
+   * User_Type -> UserType
    *
-   * @param type  UserType
+   * @param type  User_Type enum
    * @private
    */
   private static convertUserType(type: User_Type): UserType {

@@ -6,20 +6,24 @@ import {
   USER_SERVICE_NAME,
   AppClient,
   UserClient,
-  Seller_DataStatus,
+  SellerDetail_DataStatus,
 } from '../proto/user';
+import { IdDto } from '../core/dto/id.dto';
+import { PaginatedDto } from '../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
+import { FindSellersDto } from './dto/find-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
 import { SaveStoreDataDto } from './dto/save-store-data.dto';
 import { SaveContactDataDto } from './dto/save-contact-data.dto';
 import { SaveAccountDataDto } from './dto/save-account-data.dto';
 import { SaveBusinessDataDto } from './dto/save-business-data.dto';
 import { DataStatus } from './enums/data-status.enum';
-import { Seller } from './types/seller';
-import { StoreData } from './types/store-data';
-import { ContactData } from './types/contact-data';
-import { AccountData } from './types/account-data';
-import { BusinessData } from './types/business-data';
+import { SellerDto } from './dto/seller.dto';
+import { SellerDetailDto } from './dto/seller-detail.dto';
+import { StoreDataDto } from './dto/store-data.dto';
+import { ContactDataDto } from './dto/contact-data.dto';
+import { AccountDataDto } from './dto/account-data.dto';
+import { BusinessDataDto } from './dto/business-data.dto';
 
 /**
  * Service: Sellers
@@ -32,7 +36,7 @@ export class SellersService implements OnModuleInit {
    */
   private appClient: AppClient;
   /**
-   * User service client
+   * UserDto service client
    * @private
    */
   private userClient: UserClient;
@@ -60,89 +64,175 @@ export class SellersService implements OnModuleInit {
     return await lastValueFrom(svc$);
   }
 
-  async create(createSellerDto: CreateSellerDto): Promise<string> {
+  /**
+   * Create new seller
+   *
+   * @param createSellerDto CreateSellerDto
+   * @return  ID of new seller
+   */
+  async create(createSellerDto: CreateSellerDto): Promise<IdDto> {
     const res$ = this.userClient.createSeller(createSellerDto);
-    const { id } = await lastValueFrom(res$);
-    return id;
-  }
-
-  async findOne(id: string): Promise<Seller> {
-    const res$ = this.userClient.getSeller({ id });
     const res = await lastValueFrom(res$);
-    return Seller.fromResponse(res);
+    return new IdDto(res);
   }
 
+  /**
+   * Find sellers
+   *
+   * @param findSellersDto  FindSellersDto
+   */
+  async find(findSellersDto: FindSellersDto): Promise<PaginatedDto<SellerDto>> {
+    const res$ = this.userClient.findSellers(findSellersDto);
+    const res = await lastValueFrom(res$);
+    return new PaginatedDto(SellerDto, res);
+  }
+
+  /**
+   * Find a seller by ID
+   *
+   * @param id  Seller ID
+   */
+  async findOne(id: string): Promise<SellerDetailDto> {
+    const res$ = this.userClient.getSellerDetail({ id });
+    const res = await lastValueFrom(res$);
+    return new SellerDetailDto(res);
+  }
+
+  /**
+   * Update existing seller
+   *
+   * @param id              Seller ID
+   * @param updateSellerDto UpdateSellerDto
+   */
   async update(id: string, updateSellerDto: UpdateSellerDto): Promise<void> {
     const empty$ = this.userClient.updateSeller({
       id,
       password: updateSellerDto.password,
       name: updateSellerDto.name,
-      storeDataStatus: updateSellerDto.storeDataStatus && SellersService.convertDataStatus(updateSellerDto.storeDataStatus),
+      storeDataStatus:
+        updateSellerDto.storeDataStatus &&
+        SellersService.convertDataStatus(updateSellerDto.storeDataStatus),
       storeDataComment: updateSellerDto.storeDataComment,
-      contactDataStatus: updateSellerDto.contactDataStatus && SellersService.convertDataStatus(updateSellerDto.contactDataStatus),
+      contactDataStatus:
+        updateSellerDto.contactDataStatus &&
+        SellersService.convertDataStatus(updateSellerDto.contactDataStatus),
       contactDataComment: updateSellerDto.contactDataComment,
-      accountDataStatus: updateSellerDto.accountDataStatus && SellersService.convertDataStatus(updateSellerDto.accountDataStatus),
+      accountDataStatus:
+        updateSellerDto.accountDataStatus &&
+        SellersService.convertDataStatus(updateSellerDto.accountDataStatus),
       accountDataComment: updateSellerDto.accountDataComment,
-      businessDataStatus: updateSellerDto.businessDataStatus && SellersService.convertDataStatus(updateSellerDto.businessDataStatus),
+      businessDataStatus:
+        updateSellerDto.businessDataStatus &&
+        SellersService.convertDataStatus(updateSellerDto.businessDataStatus),
       businessDataComment: updateSellerDto.businessDataComment,
     });
     await lastValueFrom(empty$);
   }
 
+  /**
+   * Save store data
+   *
+   * @param id                Seller ID
+   * @param saveStoreDataDto  SaveStoreDataDto
+   */
   async saveStoreData(id: string, saveStoreDataDto: SaveStoreDataDto): Promise<void> {
     const empty$ = this.userClient.saveSellerStoreData({ id, ...saveStoreDataDto });
     await lastValueFrom(empty$);
   }
 
-  async getStoreData(id: string): Promise<StoreData> {
+  /**
+   * Read store data
+   *
+   * @param id  Seller ID
+   */
+  async getStoreData(id: string): Promise<StoreDataDto> {
     const res$ = this.userClient.getSellerStoreData({ id });
     const res = await lastValueFrom(res$);
-    return StoreData.fromResponse(res);
+    return new StoreDataDto(res);
   }
 
+  /**
+   * Save contact data
+   *
+   * @param id                  Seller ID
+   * @param saveContactDataDto  SaveContactDataDto
+   */
   async saveContactData(id: string, saveContactDataDto: SaveContactDataDto): Promise<void> {
     const empty$ = this.userClient.saveSellerContactData({ id, ...saveContactDataDto });
     await lastValueFrom(empty$);
   }
 
-  async getContactData(id: string): Promise<ContactData> {
+  /**
+   * Read contact data
+   *
+   * @param id  Seller ID
+   */
+  async getContactData(id: string): Promise<ContactDataDto> {
     const res$ = this.userClient.getSellerContactData({ id });
     const res = await lastValueFrom(res$);
-    return ContactData.fromResponse(res);
+    return new ContactDataDto(res);
   }
 
+  /**
+   * Save account data
+   *
+   * @param id                  Seller ID
+   * @param saveAccountDataDto  SaveAccountDataDto
+   */
   async saveAccountData(id: string, saveAccountDataDto: SaveAccountDataDto): Promise<void> {
     const empty$ = this.userClient.saveSellerAccountData({ id, ...saveAccountDataDto });
     await lastValueFrom(empty$);
   }
 
-  async getAccountData(id: string): Promise<AccountData> {
+  /**
+   * Read account data
+   *
+   * @param id  Seller ID
+   */
+  async getAccountData(id: string): Promise<AccountDataDto> {
     const res$ = this.userClient.getSellerAccountData({ id });
     const res = await lastValueFrom(res$);
-    return AccountData.fromResponse(res);
+    return new AccountDataDto(res);
   }
 
+  /**
+   * Save business data
+   *
+   * @param id                  Seller ID
+   * @param saveBusinessDataDto SaveBusinessDataDto
+   */
   async saveBusinessData(id: string, saveBusinessDataDto: SaveBusinessDataDto): Promise<void> {
     const empty$ = this.userClient.saveSellerBusinessData({ id, ...saveBusinessDataDto });
     await lastValueFrom(empty$);
   }
 
-  async getBusinessData(id: string): Promise<BusinessData> {
+  /**
+   * Read business data
+   *
+   * @param id  Seller ID
+   */
+  async getBusinessData(id: string): Promise<BusinessDataDto> {
     const res$ = this.userClient.getSellerBusinessData({ id });
     const res = await lastValueFrom(res$);
-    return BusinessData.fromResponse(res);
+    return new BusinessDataDto(res);
   }
 
-  private static convertDataStatus(dataStatus: DataStatus): Seller_DataStatus {
+  /**
+   * DataStatus -> SellerDetail_DataStatus
+   *
+   * @param dataStatus  DataStatus enum
+   * @private
+   */
+  private static convertDataStatus(dataStatus: DataStatus): SellerDetail_DataStatus {
     switch (dataStatus) {
       case DataStatus.None:
-        return Seller_DataStatus.NONE;
+        return SellerDetail_DataStatus.NONE;
       case DataStatus.Submitted:
-        return Seller_DataStatus.SUBMITTED;
+        return SellerDetail_DataStatus.SUBMITTED;
       case DataStatus.Approved:
-        return Seller_DataStatus.APPROVED;
+        return SellerDetail_DataStatus.APPROVED;
       case DataStatus.Rejected:
-        return Seller_DataStatus.REJECTED;
+        return SellerDetail_DataStatus.REJECTED;
       default:
         throw new InternalServerErrorException();
     }
