@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { User as UserResponse, User_Type } from 'proto/auth';
+import { User as UserResponse } from 'proto/auth';
 import { UserType } from '../enums/user-type.enum';
 
 /**
@@ -17,7 +17,7 @@ export class UserDto {
     this.id = response.id;
     this.email = response.email;
     this.isAdmin = response.isAdmin;
-    this.joinedAt = new Date(response.createdAt);
+    this.joinedAt = response.createdAt as Date;
   }
 
   @ApiProperty({
@@ -51,18 +51,18 @@ export class UserDto {
   readonly joinedAt: Date;
 
   /**
-   * User_Type -> UserType
+   * string -> UserType
    *
-   * @param type  User_Type enum
+   * @param type  type string
    * @private
    */
-  private static convertUserType(type: User_Type): UserType {
+  private static convertUserType(type: string): UserType {
     switch (type) {
-      case User_Type.STAFF:
+      case 'staff':
         return UserType.Staff;
-      case User_Type.SELLER:
+      case 'seller':
         return UserType.Seller;
-      case User_Type.TEMP:
+      case 'temp':
         return UserType.Temp;
       default:
         throw new InternalServerErrorException();

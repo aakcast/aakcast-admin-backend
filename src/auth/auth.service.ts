@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, AUTH_SERVICE_NAME, AppClient, AuthClient, User_Type } from 'proto/auth';
+import { APP_SERVICE_NAME, AUTH_SERVICE_NAME, AppClient, AuthClient } from 'proto/auth';
 import { UserType } from './enums/user-type.enum';
 import { UserDto } from './dto/user.dto';
 import { OtpDto } from './dto/otp.dto';
@@ -135,21 +135,19 @@ export class AuthService implements OnModuleInit {
   }
 
   /**
-   * UserType -> User_Type
+   * UserType -> string
    *
-   * @param type  UserType
+   * @param type  UserType enum
    * @private
    */
-  private static convertUserType(type: UserType): User_Type {
+  private static convertUserType(type: UserType): string {
     switch (type) {
       case UserType.Staff:
-        return User_Type.STAFF;
       case UserType.Seller:
-        return User_Type.SELLER;
       case UserType.Temp:
-        return User_Type.TEMP;
+        return type;
       default:
-        throw new InternalServerErrorException();
+        return '';
     }
   }
 }

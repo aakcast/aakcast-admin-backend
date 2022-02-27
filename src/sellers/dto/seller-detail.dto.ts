@@ -76,7 +76,7 @@ export class SellerDetailDto extends SellerDto {
   /**
    * string -> DataStatus
    *
-   * @param status  Seller_DataStatus enum
+   * @param status  status string
    * @private
    */
   private static convertDataStatus(status: string): DataStatus {
