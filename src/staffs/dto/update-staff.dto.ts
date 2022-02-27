@@ -1,4 +1,4 @@
-import { PartialType, OmitType } from '@nestjs/swagger';
+import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CreateStaffDto } from './create-staff.dto';
 
 /**
