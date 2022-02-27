@@ -28,7 +28,7 @@ import {
 } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../core/decorators/api-response.decorator';
 import { FastifyReply } from 'fastify';
-import { MultipartFile } from 'fastify-multipart';
+// import { MultipartFile } from 'fastify-multipart';
 import { SellersService } from './sellers.service';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
 import { IdDto } from '../core/dto/id.dto';
@@ -271,24 +271,6 @@ export class SellersController {
   }
 
   /**
-   * GET /v1/sellers/:id/store-data/
-   *
-   * @param id  Seller ID
-   */
-  @Get(':id/store-data')
-  @ApiOperation({
-    summary: '스토어 정보 상세',
-    description: '스토어 정보를 가져온다.',
-  })
-  @ApiOkResponse({ description: '정상', type: StoreDataDto })
-  @ApiNotFoundResponse({ description: '스토어 정보가 존재하지 않음' })
-  getStoreData(@Param('id') id: string): Promise<StoreDataDto> {
-    this.logger.log(`GET /v1/sellers/${id}/store-data/`);
-
-    return this.sellersService.getStoreData(id);
-  }
-
-  /**
    * PUT /v1/sellers/:id/contact-data/
    *
    * @param req                 Request object
@@ -316,24 +298,6 @@ export class SellersController {
     await this.sellersService.update(id, {
       contactDataStatus: 'submitted',
     });
-  }
-
-  /**
-   * GET /v1/sellers/:id/contact-data/
-   *
-   * @param id  Seller ID
-   */
-  @Get(':id/contact-data')
-  @ApiOperation({
-    summary: '셀러 정보 상세',
-    description: '셀러 정보를 가져온다.',
-  })
-  @ApiOkResponse({ description: '정상', type: ContactDataDto })
-  @ApiNotFoundResponse({ description: '셀러 정보가 존재하지 않음' })
-  getContactData(@Param('id') id: string): Promise<ContactDataDto> {
-    this.logger.log(`GET /v1/sellers/${id}/contact-data/`);
-
-    return this.sellersService.getContactData(id);
   }
 
   /**
@@ -365,24 +329,6 @@ export class SellersController {
   }
 
   /**
-   * GET /v1/sellers/:id/account-data/
-   *
-   * @param id  Seller ID
-   */
-  @Get(':id/account-data')
-  @ApiOperation({
-    summary: '정산 정보 상세',
-    description: '정산 정보를 가져온다.',
-  })
-  @ApiOkResponse({ description: '정상', type: AccountDataDto })
-  @ApiNotFoundResponse({ description: '정산 정보가 존재하지 않음' })
-  getAccountData(@Param('id') id: string): Promise<AccountDataDto> {
-    this.logger.log(`GET /v1/sellers/${id}/account-data/`);
-
-    return this.sellersService.getAccountData(id);
-  }
-
-  /**
    * PUT /v1/sellers/:id/business-data/
    *
    * @param id                  Seller ID
@@ -408,6 +354,60 @@ export class SellersController {
     await this.sellersService.update(id, {
       businessDataStatus: 'submitted',
     });
+  }
+
+  /**
+   * GET /v1/sellers/:id/store-data/
+   *
+   * @param id  Seller ID
+   */
+  @Get(':id/store-data')
+  @ApiOperation({
+    summary: '스토어 정보 상세',
+    description: '스토어 정보를 가져온다.',
+  })
+  @ApiOkResponse({ description: '정상', type: StoreDataDto })
+  @ApiNotFoundResponse({ description: '스토어 정보가 존재하지 않음' })
+  getStoreData(@Param('id') id: string): Promise<StoreDataDto> {
+    this.logger.log(`GET /v1/sellers/${id}/store-data/`);
+
+    return this.sellersService.getStoreData(id);
+  }
+
+  /**
+   * GET /v1/sellers/:id/contact-data/
+   *
+   * @param id  Seller ID
+   */
+  @Get(':id/contact-data')
+  @ApiOperation({
+    summary: '셀러 정보 상세',
+    description: '셀러 정보를 가져온다.',
+  })
+  @ApiOkResponse({ description: '정상', type: ContactDataDto })
+  @ApiNotFoundResponse({ description: '셀러 정보가 존재하지 않음' })
+  getContactData(@Param('id') id: string): Promise<ContactDataDto> {
+    this.logger.log(`GET /v1/sellers/${id}/contact-data/`);
+
+    return this.sellersService.getContactData(id);
+  }
+
+  /**
+   * GET /v1/sellers/:id/account-data/
+   *
+   * @param id  Seller ID
+   */
+  @Get(':id/account-data')
+  @ApiOperation({
+    summary: '정산 정보 상세',
+    description: '정산 정보를 가져온다.',
+  })
+  @ApiOkResponse({ description: '정상', type: AccountDataDto })
+  @ApiNotFoundResponse({ description: '정산 정보가 존재하지 않음' })
+  getAccountData(@Param('id') id: string): Promise<AccountDataDto> {
+    this.logger.log(`GET /v1/sellers/${id}/account-data/`);
+
+    return this.sellersService.getAccountData(id);
   }
 
   /**
