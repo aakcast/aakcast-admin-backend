@@ -1,14 +1,18 @@
-import { IsString, IsPhoneNumber, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * DTO: SaveContactDataDto
  */
 export class SaveContactDataDto {
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: '담당자 이름',
+    example: '송준영',
+  })
   name: string;
 
-  @IsPhoneNumber('KR')
-  @IsOptional()
+  @ApiProperty({
+    description: '담당지 연락처',
+    example: '01097582014',
+  })
   tel: string;
 }

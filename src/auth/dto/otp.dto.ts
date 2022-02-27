@@ -1,13 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { plainToClass } from 'class-transformer';
 import { Otp as OtpResponse } from 'proto/auth';
 
 /**
  * Type: OtpDto
  */
 export class OtpDto {
-  static fromResponse(response: OtpResponse): OtpDto {
-    return plainToClass(OtpDto, response);
+  /**
+   * Constructor
+   *
+   * @param response  OtpResponse
+   */
+  constructor(response: OtpResponse) {
+    this.code = response.code;
   }
 
   @ApiProperty({

@@ -29,7 +29,6 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UserType } from './enums/user-type.enum';
 import { UserDto } from './dto/user.dto';
 
 /** Schema object - EmailVerification */
@@ -124,7 +123,7 @@ export class AuthController {
     const { email } = verifyEmailDto;
 
     // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
-    const staff = await this.authService.findUser(UserType.Seller, email);
+    const staff = await this.authService.findUser('seller', email);
 
     return {
       email,

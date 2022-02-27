@@ -1,8 +1,7 @@
-import { Inject, Injectable, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { APP_SERVICE_NAME, AUTH_SERVICE_NAME, AppClient, AuthClient } from 'proto/auth';
-import { UserType } from './enums/user-type.enum';
 import { UserDto } from './dto/user.dto';
 import { OtpDto } from './dto/otp.dto';
 
@@ -51,9 +50,9 @@ export class AuthService implements OnModuleInit {
    * @param type  user type
    * @param email login email of user
    */
-  async findUser(type: UserType, email: string): Promise<UserDto> {
+  async findUser(type: string, email: string): Promise<UserDto> {
     const res$ = this.authClient.findUser({
-      type: AuthService.convertUserType(type),
+      type,
       email,
     });
     const res = await lastValueFrom(res$);
@@ -67,10 +66,10 @@ export class AuthService implements OnModuleInit {
    * @param email     login email of user
    * @param password  login password of user
    */
-  async validateUser(type: UserType, email: string, password: string): Promise<UserDto | null> {
+  async validateUser(type: string, email: string, password: string): Promise<UserDto | null> {
     try {
       const res$ = this.authClient.validateUser({
-        type: AuthService.convertUserType(type),
+        type,
         email,
         password,
       });
@@ -94,7 +93,7 @@ export class AuthService implements OnModuleInit {
       expires: new Date(Date.now() + 3 * 60 * 1000).toString(), // 3 minutes
     });
     const res = await lastValueFrom(res$);
-    return OtpDto.fromResponse(res);
+    return new OtpDto(res);
   }
 
   /**
@@ -125,29 +124,12 @@ export class AuthService implements OnModuleInit {
    * @param email     email (give higher authorization level)
    * @param password  new password
    */
-  async resetPassword(type: UserType, email: string, password: string): Promise<void> {
+  async resetPassword(type: string, email: string, password: string): Promise<void> {
     const empty$ = this.authClient.resetPassword({
-      type: AuthService.convertUserType(type),
+      type,
       email,
       password,
     });
     await lastValueFrom(empty$);
-  }
-
-  /**
-   * UserType -> string
-   *
-   * @param type  UserType enum
-   * @private
-   */
-  private static convertUserType(type: UserType): string {
-    switch (type) {
-      case UserType.Staff:
-      case UserType.Seller:
-      case UserType.Temp:
-        return type;
-      default:
-        return '';
-    }
   }
 }

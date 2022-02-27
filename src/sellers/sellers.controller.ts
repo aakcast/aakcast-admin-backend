@@ -1,9 +1,8 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
-  Logger,
+  UseGuards,
   Param,
   Patch,
   Post,
@@ -11,22 +10,25 @@ import {
   Query,
   Req,
   Res,
-  UseGuards,
+  Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiNoContentResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../core/decorators/api-response.decorator';
 import { FastifyReply } from 'fastify';
+import { MultipartFile } from 'fastify-multipart';
 import { SellersService } from './sellers.service';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
 import { IdDto } from '../core/dto/id.dto';
@@ -44,7 +46,6 @@ import { StoreDataDto } from './dto/store-data.dto';
 import { ContactDataDto } from './dto/contact-data.dto';
 import { AccountDataDto } from './dto/account-data.dto';
 import { BusinessDataDto } from './dto/business-data.dto';
-import { DataStatus } from './enums/data-status.enum';
 
 /**
  * Controller: Sellers
@@ -69,6 +70,12 @@ export class SellersController {
    * GET /v1/sellers/hello/
    */
   @Get('hello')
+  @ApiOperation({
+    summary: 'Hello',
+    description: 'API의 상태를 확인한다.',
+  })
+  @ApiOkResponse({ description: '정상' })
+  @ApiInternalServerErrorResponse({ description: '서비스 접속 불가' })
   hello() {
     this.logger.log(`GET /v1/sellers/hello/`);
     return this.sellersService.hello();
@@ -111,9 +118,9 @@ export class SellersController {
   }
 
   /**
-   * GET /v1/sellers/{id}/
+   * GET /v1/sellers/:id/
    *
-   * @param id  SellerDto ID
+   * @param id  Seller ID
    */
   @Get(':id')
   @ApiOperation({
@@ -132,7 +139,7 @@ export class SellersController {
    * PATCH /v1
    *
    * @param req             Request object
-   * @param id              SellerDto ID
+   * @param id              Seller ID
    * @param updateSellerDto UpdateSellerDto
    */
   @Patch(':id')
@@ -155,14 +162,14 @@ export class SellersController {
   }
 
   /**
-   * POST /v1/sellers/{id}/upload/
+   * POST /v1/sellers/:id/upload/
    *
-   * @param id  SellerDto ID
+   * @param id  Seller ID
    * @param req Request object
    * @param res Reply object
    */
   @Post(':id/upload')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '파일 업로드',
     description: '판매자와 관련된 파일(이미지)를 업로드한다.',
@@ -183,7 +190,20 @@ export class SellersController {
       },
     },
   })
-  @ApiOkResponse({ description: '성공' })
+  @ApiOkResponse({
+    description: '성공',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          filename: { type: 'string' },
+          mimetype: { type: 'string' },
+          url: { type: 'string' },
+        },
+      },
+    },
+  })
   async uploadFiles(
     @Param('id') id: string,
     @Req() req: any,
@@ -196,7 +216,7 @@ export class SellersController {
       throw new BadRequestException();
     }
 
-    // TODO: This is temporary implementation - files should be uploaded to S3
+    // // TODO: This is temporary implementation - files should be uploaded to S3
     // const fs = await require('fs');
     // const path = await require('path');
     // const crypto = await require('crypto');
@@ -211,19 +231,21 @@ export class SellersController {
     // const dir = `assets/sellers/${id}`;
     // const pump = util.promisify(pipeline);
     // fs.mkdirSync(dir, { recursive: true });
-    // for await (const part of req.files()) {
-    //   const filename = await getHashFileName(part);
-    //   await pump(part.file, fs.createWriteStream(`${dir}/${filename}`));
-    // }
-    ////////////////////////////////////////////////////////////////////////////
+    for await (const part of req.files()) {
+      console.log(part.filename);
+      console.log(part.mimetype);
+      // const filename = await getHashFileName(part);
+      // await pump(part.file, fs.createWriteStream(`${dir}/${filename}`));
+    }
+    // ////////////////////////////////////////////////////////////////////////////
 
     res.code(200).send();
   }
 
   /**
-   * PUT /v1/sellers/{id}/store-data/
+   * PUT /v1/sellers/:id/store-data/
    *
-   * @param id                SellerDto ID
+   * @param id                Seller ID
    * @param saveStoreDataDto  SaveStoreDataDto
    */
   @Put(':id/store-data')
@@ -244,14 +266,14 @@ export class SellersController {
 
     await this.sellersService.saveStoreData(id, saveStoreDataDto);
     await this.sellersService.update(id, {
-      storeDataStatus: DataStatus.Submitted,
+      storeDataStatus: 'submitted',
     });
   }
 
   /**
-   * GET /v1/sellers/{id}/store-data/
+   * GET /v1/sellers/:id/store-data/
    *
-   * @param id  SellerDto ID
+   * @param id  Seller ID
    */
   @Get(':id/store-data')
   @ApiOperation({
@@ -267,10 +289,10 @@ export class SellersController {
   }
 
   /**
-   * PUT /v1/sellers/{id}/contact-data/
+   * PUT /v1/sellers/:id/contact-data/
    *
    * @param req                 Request object
-   * @param id                  SellerDto ID
+   * @param id                  Seller ID
    * @param saveContactDataDto  SaveContactDataDto
    */
   @Put(':id/contact-data')
@@ -292,14 +314,14 @@ export class SellersController {
 
     await this.sellersService.saveContactData(id, saveContactDataDto);
     await this.sellersService.update(id, {
-      contactDataStatus: DataStatus.Submitted,
+      contactDataStatus: 'submitted',
     });
   }
 
   /**
-   * GET /v1/sellers/{id}/contact-data/
+   * GET /v1/sellers/:id/contact-data/
    *
-   * @param id  SellerDto ID
+   * @param id  Seller ID
    */
   @Get(':id/contact-data')
   @ApiOperation({
@@ -314,6 +336,12 @@ export class SellersController {
     return this.sellersService.getContactData(id);
   }
 
+  /**
+   * PUT /v1/sellers/:id/account-data/
+   *
+   * @param id                  Seller ID
+   * @param saveAccountDataDto  SaveAccountDataDto
+   */
   @Put(':id/account-data')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
@@ -332,10 +360,15 @@ export class SellersController {
 
     await this.sellersService.saveAccountData(id, saveAccountDataDto);
     await this.sellersService.update(id, {
-      accountDataStatus: DataStatus.Submitted,
+      accountDataStatus: 'submitted',
     });
   }
 
+  /**
+   * GET /v1/sellers/:id/account-data/
+   *
+   * @param id  Seller ID
+   */
   @Get(':id/account-data')
   @ApiOperation({
     summary: '정산 정보 상세',
@@ -349,6 +382,12 @@ export class SellersController {
     return this.sellersService.getAccountData(id);
   }
 
+  /**
+   * PUT /v1/sellers/:id/business-data/
+   *
+   * @param id                  Seller ID
+   * @param saveBusinessDataDto SaveBusinessDataDto
+   */
   @Put(':id/business-data')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
@@ -367,10 +406,15 @@ export class SellersController {
 
     await this.sellersService.saveBusinessData(id, saveBusinessDataDto);
     await this.sellersService.update(id, {
-      businessDataStatus: DataStatus.Submitted,
+      businessDataStatus: 'submitted',
     });
   }
 
+  /**
+   * GET /v1/sellers/:id/business-data/
+   *
+   * @param id  Seller ID
+   */
   @Get(':id/business-data')
   @ApiOperation({
     summary: '사업자 정보 상세',

@@ -1,7 +1,5 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { User as UserResponse } from 'proto/auth';
-import { UserType } from '../enums/user-type.enum';
 
 /**
  * DTO: User
@@ -13,7 +11,7 @@ export class UserDto {
    * @param response  UserResponse
    */
   constructor(response: UserResponse) {
-    this.type = UserDto.convertUserType(response.type);
+    this.type = response.type;
     this.id = response.id;
     this.email = response.email;
     this.isAdmin = response.isAdmin;
@@ -22,9 +20,9 @@ export class UserDto {
 
   @ApiProperty({
     description: '사용자 타입',
-    example: UserType.Staff,
+    example: 'staff',
   })
-  readonly type: UserType;
+  readonly type: string;
 
   @ApiProperty({
     description: '사용자 ID',
@@ -49,23 +47,4 @@ export class UserDto {
     example: new Date('2022-01-01T00:00:00Z'),
   })
   readonly joinedAt: Date;
-
-  /**
-   * string -> UserType
-   *
-   * @param type  type string
-   * @private
-   */
-  private static convertUserType(type: string): UserType {
-    switch (type) {
-      case 'staff':
-        return UserType.Staff;
-      case 'seller':
-        return UserType.Seller;
-      case 'temp':
-        return UserType.Temp;
-      default:
-        throw new InternalServerErrorException();
-    }
-  }
 }

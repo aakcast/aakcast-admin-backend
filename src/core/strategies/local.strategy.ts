@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../../auth/auth.service';
-import { UserType } from '../../auth/enums/user-type.enum';
 import { UserDto } from '../../auth/dto/user.dto';
 
 /**
@@ -28,8 +27,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   async validate(username: string, password: string): Promise<UserDto> {
     // TODO: 좀 이상하구나. 'local-staff', 'local-admin' 이렇게 써야 할 듯.
     const user =
-      (await this.authService.validateUser(UserType.Staff, username, password)) ||
-      (await this.authService.validateUser(UserType.Seller, username, password));
+      (await this.authService.validateUser('staff', username, password)) ||
+      (await this.authService.validateUser('seller', username, password));
     if (!user) {
       throw new UnauthorizedException();
     }

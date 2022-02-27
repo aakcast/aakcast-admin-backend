@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SellerDetail as SellerDetailResponse } from 'proto/user';
-import { DataStatus } from '../enums/data-status.enum';
 import { SellerDto } from './seller.dto';
 
 /**
@@ -15,21 +14,21 @@ export class SellerDetailDto extends SellerDto {
   constructor(response: SellerDetailResponse) {
     super(response);
 
-    this.storeDataStatus = SellerDetailDto.convertDataStatus(response.storeDataStatus);
+    this.storeDataStatus = response.storeDataStatus;
     this.storeDataComment = response.storeDataComment;
-    this.contactDataStatus = SellerDetailDto.convertDataStatus(response.contactDataStatus);
+    this.contactDataStatus = response.contactDataStatus;
     this.contactDataComment = response.contactDataComment;
-    this.accountDataStatus = SellerDetailDto.convertDataStatus(response.accountDataStatus);
+    this.accountDataStatus = response.accountDataStatus;
     this.accountDataComment = response.accountDataComment;
-    this.businessDataStatus = SellerDetailDto.convertDataStatus(response.businessDataStatus);
+    this.businessDataStatus = response.businessDataStatus;
     this.businessDataComment = response.businessDataComment;
   }
 
   @ApiProperty({
     description: '스토어 정보 심사 상태',
-    example: DataStatus.Submitted,
+    example: 'submitted',
   })
-  readonly storeDataStatus: DataStatus;
+  readonly storeDataStatus: string;
 
   @ApiProperty({
     description: '스토어 정보 거절 사유',
@@ -39,9 +38,9 @@ export class SellerDetailDto extends SellerDto {
 
   @ApiProperty({
     description: '셀러 정보 심사 상태',
-    example: DataStatus.Approved,
+    example: 'approved',
   })
-  readonly contactDataStatus: DataStatus;
+  readonly contactDataStatus: string;
 
   @ApiProperty({
     description: '셀러 정보 거절 사유',
@@ -51,9 +50,9 @@ export class SellerDetailDto extends SellerDto {
 
   @ApiProperty({
     description: '정산 정보 심사 상태',
-    example: DataStatus.None,
+    example: '',
   })
-  readonly accountDataStatus: DataStatus;
+  readonly accountDataStatus: string;
 
   @ApiProperty({
     description: '정산 정보 거절 사유',
@@ -63,32 +62,13 @@ export class SellerDetailDto extends SellerDto {
 
   @ApiProperty({
     description: '사업자 정보 심사 상태',
-    example: DataStatus.Rejected,
+    example: 'rejected',
   })
-  readonly businessDataStatus: DataStatus;
+  readonly businessDataStatus: string;
 
   @ApiProperty({
     description: '사업자 정보 거절 사유',
     example: '사유',
   })
   readonly businessDataComment: string;
-
-  /**
-   * string -> DataStatus
-   *
-   * @param status  status string
-   * @private
-   */
-  private static convertDataStatus(status: string): DataStatus {
-    switch (status) {
-      case 'submitted':
-        return DataStatus.Submitted;
-      case 'approved':
-        return DataStatus.Approved;
-      case 'rejected':
-        return DataStatus.Rejected;
-      default:
-        return DataStatus.None;
-    }
-  }
 }

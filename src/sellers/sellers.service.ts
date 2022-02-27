@@ -11,7 +11,6 @@ import { SaveStoreDataDto } from './dto/save-store-data.dto';
 import { SaveContactDataDto } from './dto/save-contact-data.dto';
 import { SaveAccountDataDto } from './dto/save-account-data.dto';
 import { SaveBusinessDataDto } from './dto/save-business-data.dto';
-import { DataStatus } from './enums/data-status.enum';
 import { SellerDto } from './dto/seller.dto';
 import { SellerDetailDto } from './dto/seller-detail.dto';
 import { StoreDataDto } from './dto/store-data.dto';
@@ -99,27 +98,7 @@ export class SellersService implements OnModuleInit {
    * @param updateSellerDto UpdateSellerDto
    */
   async update(id: string, updateSellerDto: UpdateSellerDto): Promise<void> {
-    const empty$ = this.usersClient.updateSeller({
-      id,
-      password: updateSellerDto.password,
-      name: updateSellerDto.name,
-      storeDataStatus:
-        updateSellerDto.storeDataStatus &&
-        SellersService.convertDataStatus(updateSellerDto.storeDataStatus),
-      storeDataComment: updateSellerDto.storeDataComment,
-      contactDataStatus:
-        updateSellerDto.contactDataStatus &&
-        SellersService.convertDataStatus(updateSellerDto.contactDataStatus),
-      contactDataComment: updateSellerDto.contactDataComment,
-      accountDataStatus:
-        updateSellerDto.accountDataStatus &&
-        SellersService.convertDataStatus(updateSellerDto.accountDataStatus),
-      accountDataComment: updateSellerDto.accountDataComment,
-      businessDataStatus:
-        updateSellerDto.businessDataStatus &&
-        SellersService.convertDataStatus(updateSellerDto.businessDataStatus),
-      businessDataComment: updateSellerDto.businessDataComment,
-    });
+    const empty$ = this.usersClient.updateSeller({ id, ...updateSellerDto });
     await lastValueFrom(empty$);
   }
 
@@ -209,22 +188,5 @@ export class SellersService implements OnModuleInit {
     const res$ = this.usersClient.getSellerBusinessData({ id });
     const res = await lastValueFrom(res$);
     return new BusinessDataDto(res);
-  }
-
-  /**
-   * DataStatus -> string
-   *
-   * @param dataStatus  DataStatus enum
-   * @private
-   */
-  private static convertDataStatus(dataStatus: DataStatus): string {
-    switch (dataStatus) {
-      case DataStatus.Submitted:
-      case DataStatus.Approved:
-      case DataStatus.Rejected:
-        return dataStatus;
-      default:
-        return '';
-    }
   }
 }

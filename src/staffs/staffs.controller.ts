@@ -19,6 +19,7 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../core/decorators/api-response.decorator';
 import { StaffsService } from './staffs.service';
@@ -57,6 +58,8 @@ export class StaffsController {
     summary: 'Hello',
     description: 'API의 상태를 확인한다.',
   })
+  @ApiOkResponse({ description: '정상' })
+  @ApiInternalServerErrorResponse({ description: '서비스 접속 불가' })
   hello() {
     this.logger.log(`GET /v1/staffs/hello/`);
     return this.staffsService.hello();
@@ -99,7 +102,7 @@ export class StaffsController {
   }
 
   /**
-   * GET /v1/staffs/{id}/
+   * GET /v1/staffs/:id/
    *
    * @param id  StaffDto ID
    */
@@ -117,7 +120,7 @@ export class StaffsController {
   }
 
   /**
-   * PATCH /v1/staffs/{id}/
+   * PATCH /v1/staffs/:id/
    *
    * @param req             Request object
    * @param id              StaffDto ID
@@ -143,7 +146,7 @@ export class StaffsController {
   }
 
   /**
-   * DELETE /v1/staffs/{id}/
+   * DELETE /v1/staffs/:id/
    *
    * @param id  StaffDto ID
    */
