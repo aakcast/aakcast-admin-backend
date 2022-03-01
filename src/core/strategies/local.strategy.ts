@@ -14,7 +14,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * @param usersService Injected instance of auth service
    */
   constructor(private readonly usersService: UsersService) {
-    super();
+    super({ usernameField: 'email' });
   }
 
   /**
@@ -23,7 +23,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * @param password  login password of user
    */
   async validate(username: string, password: string): Promise<UserDto> {
-    // TODO: 좀 이상하구나. 'local-staff', 'local-admin' 이렇게 써야 할 듯.
     const user =
       (await this.usersService.validate('staff', username, password)) ||
       (await this.usersService.validate('seller', username, password));

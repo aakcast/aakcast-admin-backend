@@ -36,7 +36,10 @@ export const AuthPackage = ClientsModule.register([
     PassportModule,
     JwtModule.register({
       secret: 'my-secret',
-      signOptions: { expiresIn: '3d' },
+      signOptions: {
+        issuer: 'aakcast.io',
+        expiresIn: '3d',
+      },
     }),
   ],
   controllers: [AuthController],
