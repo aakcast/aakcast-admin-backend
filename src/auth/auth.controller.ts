@@ -203,7 +203,8 @@ export class AuthController {
     const digits = 6;
 
     // Create OTP with mobile
-    const otp = await this.authService.issueTemporaryCredentials(mobile, digits);
+    // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
+    const otp = await this.authService.issueTemporaryCredentials('seller', mobile, digits);
     this.logger.log(`>> OTP created: ${mobile} [${otp.code}]`);
 
     // TODO: 일단 슬랙으로 보낸다
@@ -231,12 +232,13 @@ export class AuthController {
     this.logger.log(`POST /auth/login-otp/`);
     this.logger.log(`> body = ${JSON.stringify(loginOtpDto)}`);
 
-    const { mobile, code, email } = loginOtpDto;
+    const { mobile, code } = loginOtpDto;
 
-    const auth = await this.authService.validateTemporaryCredentials(mobile, code, email);
-    this.logger.log(`>> user authorized: ${auth}`);
+    // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
+    const auth = await this.authService.validateTemporaryCredentials('seller', mobile, code);
+    this.logger.log(`>> user authorized: ${JSON.stringify(auth)}`);
 
-    const token = this.jwtService.sign(auth, { expiresIn: '5m' }); // available for 5 minutes
+    const token = this.jwtService.sign(auth, { expiresIn: '10m' }); // available for 10 minutes
     this.logger.log(`>> token generated: ${token}`);
 
     return {

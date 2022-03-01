@@ -52,11 +52,13 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Issue OTP for temporary login
+   * @param type    Type of user
    * @param mobile  mobile number of user
    * @param digits  length of OTP
    */
-  async issueTemporaryCredentials(mobile: string, digits = 6): Promise<OtpDto> {
+  async issueTemporaryCredentials(type: string, mobile: string, digits = 6): Promise<OtpDto> {
     const res$ = this.tempCredentialsClient.issue({
+      type,
       mobile,
       digits,
       expires: new Date(Date.now() + 3 * 60 * 1000).toString(), // 3 minutes
@@ -67,19 +69,15 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Validate OTP for temporary login
+   * @param type    Type of user
    * @param mobile  mobile number of user
    * @param code    OTP
-   * @param email   email (give higher authorization level)
    */
-  async validateTemporaryCredentials(
-    mobile: string,
-    code: string,
-    email?: string,
-  ): Promise<UserDto> {
+  async validateTemporaryCredentials(type: string, mobile: string, code: string): Promise<UserDto> {
     const res$ = this.tempCredentialsClient.validate({
+      type,
       mobile,
       code,
-      email,
     });
     const res = await lastValueFrom(res$);
     return new UserDto(res);

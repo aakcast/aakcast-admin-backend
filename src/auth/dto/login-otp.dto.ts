@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsEmail, IsMobilePhone } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsMobilePhone } from 'class-validator';
 
 /**
  * DTO: LoginOtp
@@ -22,13 +22,4 @@ export class LoginOtpDto {
     example: '623094',
   })
   code: string;
-
-  @IsOptional()
-  @IsString()
-  @IsEmail()
-  @ApiPropertyOptional({
-    description: '로그인 ID (이메일)',
-    example: 'mankiplayer@gmail.com',
-  })
-  email?: string;
 }
