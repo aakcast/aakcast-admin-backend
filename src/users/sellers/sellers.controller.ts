@@ -26,13 +26,13 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from '../core/decorators/api-response.decorator';
+import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorator';
 import { FastifyReply } from 'fastify';
 // import { MultipartFile } from 'fastify-multipart';
 import { SellersService } from './sellers.service';
-import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { IdDto } from '../core/dto/id.dto';
-import { PaginatedDto } from '../core/dto/paginated.dto';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { IdDto } from '../../core/dto/id.dto';
+import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { FindSellersDto } from './dto/find-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';

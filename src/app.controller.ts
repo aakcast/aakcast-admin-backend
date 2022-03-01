@@ -40,7 +40,7 @@ export class AppController {
   @ApiOkResponse({
     description: '정상',
   })
-  async getHello(): Promise<string> {
+  getHello() {
     this.logger.log(`GET /v1/`);
 
     return this.appService.getHello();

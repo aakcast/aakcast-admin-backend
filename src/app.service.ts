@@ -8,7 +8,10 @@ export class AppService {
   /**
    * Say hello
    */
-  getHello(): string {
-    return 'Hello World!';
+  getHello() {
+    return {
+      service: 'aakcast-admin-backend',
+      version: '1.0',
+    };
   }
 }

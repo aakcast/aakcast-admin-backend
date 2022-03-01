@@ -1,7 +1,6 @@
 import { Type, applyDecorators } from '@nestjs/common';
 import { ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
 import { PaginatedDto } from '../dto/paginated.dto';
-import { StaffDto } from '../../staffs/dto/staff.dto';
 
 /**
  * Decorator: ApiPaginatedResponse
@@ -26,7 +25,7 @@ export const ApiPaginatedResponse = <TModel extends Type>(model: TModel) => {
               results: {
                 type: 'array',
                 description: '반환 결과 목록',
-                items: { $ref: getSchemaPath(StaffDto) },
+                items: { $ref: getSchemaPath(model) },
               },
             },
           },

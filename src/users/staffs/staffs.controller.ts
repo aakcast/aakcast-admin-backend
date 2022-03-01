@@ -21,11 +21,11 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from '../core/decorators/api-response.decorator';
+import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorator';
 import { StaffsService } from './staffs.service';
-import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { IdDto } from '../core/dto/id.dto';
-import { PaginatedDto } from '../core/dto/paginated.dto';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { IdDto } from '../../core/dto/id.dto';
+import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { FindStaffsDto } from './dto/find-staffs.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';

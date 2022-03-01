@@ -2,8 +2,8 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { APP_SERVICE_NAME, SELLERS_SERVICE_NAME, AppClient, SellersClient } from 'proto/user';
-import { IdDto } from '../core/dto/id.dto';
-import { PaginatedDto } from '../core/dto/paginated.dto';
+import { IdDto } from '../../core/dto/id.dto';
+import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { FindSellersDto } from './dto/find-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
@@ -45,7 +45,6 @@ export class SellersService implements OnModuleInit {
    * Implement OnModuleInit
    */
   onModuleInit() {
-    this.appClient = this.userPackage.getService<AppClient>(APP_SERVICE_NAME);
     this.sellersClient = this.userPackage.getService<SellersClient>(SELLERS_SERVICE_NAME);
   }
 

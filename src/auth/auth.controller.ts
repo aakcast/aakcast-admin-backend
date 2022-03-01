@@ -22,6 +22,7 @@ import {
   ApiUnauthorizedResponse,
   ApiResponseSchemaHost,
 } from '@nestjs/swagger';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
@@ -87,10 +88,15 @@ export class AuthController {
   /**
    * Constructor
    *
-   * @param authService Injected instance of AuthService
-   * @param jwtService  Injected instance of JwtService
+   * @param usersService  Injected instance of UsersService
+   * @param authService   Injected instance of AuthService
+   * @param jwtService    Injected instance of JwtService
    */
-  constructor(private readonly authService: AuthService, private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   /**
    * GET /v1/auth/hello/
@@ -123,7 +129,7 @@ export class AuthController {
     const { email } = verifyEmailDto;
 
     // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
-    const staff = await this.authService.findUser('seller', email);
+    const staff = await this.usersService.findOneByEmail('seller', email);
 
     return {
       email,
@@ -198,7 +204,7 @@ export class AuthController {
     const digits = 6;
 
     // Create OTP with mobile
-    const otp = await this.authService.createTemporaryCredentials(mobile, digits);
+    const otp = await this.authService.issueTemporaryCredentials(mobile, digits);
     this.logger.log(`>> OTP created: ${mobile} [${otp.code}]`);
 
     // TODO: 일단 슬랙으로 보낸다
@@ -265,6 +271,6 @@ export class AuthController {
 
     const { type, email }: UserDto = req.user;
 
-    await this.authService.resetPassword(type, email, resetPasswordDto.password);
+    await this.usersService.resetPassword(type, email, resetPasswordDto.password);
   }
 }

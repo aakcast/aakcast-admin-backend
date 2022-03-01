@@ -1,4 +1,4 @@
-import { FindDto } from '../../core/dto/find.dto';
+import { FindDto } from '../../../core/dto/find.dto';
 
 /**
  * DTO: FindSellers
