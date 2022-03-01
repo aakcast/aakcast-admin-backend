@@ -87,5 +87,17 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "main": "dist/src/main.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aakcast/aakcast-admin-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aakcast/aakcast-admin-backend/issues"
+  },
+  "homepage": "https://github.com/aakcast/aakcast-admin-backend#readme"
 }
