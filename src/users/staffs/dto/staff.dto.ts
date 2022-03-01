@@ -7,7 +7,6 @@ import { Staff as StaffResponse } from 'proto/user';
 export class StaffDto {
   /**
    * Constructor
-   *
    * @param response  StaffResponse
    */
   constructor(response: StaffResponse) {

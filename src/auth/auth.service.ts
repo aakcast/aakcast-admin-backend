@@ -28,7 +28,6 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Constructor
-   *
    * @param authPackage Injected instance of gRPC client for auth microservice
    */
   constructor(@Inject('AUTH_PACKAGE') private readonly authPackage: ClientGrpc) {}
@@ -53,7 +52,6 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Issue OTP for temporary login
-   *
    * @param mobile  mobile number of user
    * @param digits  length of OTP
    */
@@ -69,7 +67,6 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Validate OTP for temporary login
-   *
    * @param mobile  mobile number of user
    * @param code    OTP
    * @param email   email (give higher authorization level)

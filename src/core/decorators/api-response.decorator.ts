@@ -4,7 +4,6 @@ import { PaginatedDto } from '../dto/paginated.dto';
 
 /**
  * Decorator: ApiPaginatedResponse
- *
  * @param model   Type of an item in list
  * @constructor
  */

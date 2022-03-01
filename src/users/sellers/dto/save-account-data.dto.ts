@@ -1,27 +1,37 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 /**
  * DTO: SaveAccountData
  */
 export class SaveAccountDataDto {
+  @IsNotEmpty()
+  @IsString()
   @ApiProperty({
     description: '은행명',
     example: '신한',
   })
   bank: string;
 
+  @IsNotEmpty()
+  @IsString()
   @ApiProperty({
     description: '계좌소유주',
     example: '홍원기',
   })
   accountHolder: string;
 
+  @IsNotEmpty()
+  @IsString()
   @ApiProperty({
     description: '계좌번호',
     example: '2345121314123',
   })
   accountNumber: string;
 
+  @IsNotEmpty()
+  @IsString()
+  @IsUrl()
   @ApiProperty({
     description: '계좌 이미지 URL',
     example:

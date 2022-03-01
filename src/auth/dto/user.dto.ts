@@ -7,7 +7,6 @@ import { User as UserResponse } from 'proto/auth';
 export class UserDto {
   /**
    * Constructor
-   *
    * @param response  UserResponse
    */
   constructor(response: UserResponse) {

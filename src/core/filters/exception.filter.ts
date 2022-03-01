@@ -26,7 +26,6 @@ function isGrpcError(x: any): x is ServiceError {
 export class AllExceptionsFilter implements ExceptionFilter {
   /**
    * Constructor
-   *
    * @param httpAdapterHost
    */
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}

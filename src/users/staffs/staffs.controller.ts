@@ -45,7 +45,6 @@ export class StaffsController {
 
   /**
    * Constructor
-   *
    * @param staffsService Injected instance of StaffsService
    */
   constructor(private readonly staffsService: StaffsService) {}
@@ -67,7 +66,6 @@ export class StaffsController {
 
   /**
    * POST /v1/staffs/
-   *
    * @param createStaffDto  CreateStaffDto
    */
   @Post()
@@ -85,7 +83,6 @@ export class StaffsController {
 
   /**
    * GET /v1/staffs/
-   *
    * @param findStaffsDto FindStaffsDto
    */
   @Get()
@@ -103,7 +100,6 @@ export class StaffsController {
 
   /**
    * GET /v1/staffs/:id/
-   *
    * @param id  StaffDto ID
    */
   @Get(':id')
@@ -121,7 +117,6 @@ export class StaffsController {
 
   /**
    * PATCH /v1/staffs/:id/
-   *
    * @param req             Request object
    * @param id              StaffDto ID
    * @param updateStaffDto  UpdateStaffDto
@@ -147,7 +142,6 @@ export class StaffsController {
 
   /**
    * DELETE /v1/staffs/:id/
-   *
    * @param id  StaffDto ID
    */
   @Delete(':id')

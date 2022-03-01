@@ -36,7 +36,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Constructor
-   *
    * @param userPackage Injected instance of gRPC client for user microservice
    */
   constructor(@Inject('USER_PACKAGE') private readonly userPackage: ClientGrpc) {}
@@ -45,6 +44,7 @@ export class SellersService implements OnModuleInit {
    * Implement OnModuleInit
    */
   onModuleInit() {
+    this.appClient = this.userPackage.getService<AppClient>(APP_SERVICE_NAME);
     this.sellersClient = this.userPackage.getService<SellersClient>(SELLERS_SERVICE_NAME);
   }
 
@@ -58,7 +58,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Create new seller
-   *
    * @param createSellerDto CreateSellerDto
    * @return  ID of new seller
    */
@@ -70,7 +69,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Find sellers
-   *
    * @param findSellersDto  FindSellersDto
    */
   async find(findSellersDto: FindSellersDto): Promise<PaginatedDto<SellerDto>> {
@@ -81,7 +79,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Find a seller by ID
-   *
    * @param id  Seller ID
    */
   async findOne(id: string): Promise<SellerDetailDto> {
@@ -92,7 +89,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Update existing seller
-   *
    * @param id              Seller ID
    * @param updateSellerDto UpdateSellerDto
    */
@@ -103,7 +99,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Save store data
-   *
    * @param id                Seller ID
    * @param saveStoreDataDto  SaveStoreDataDto
    */
@@ -114,7 +109,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Save contact data
-   *
    * @param id                  Seller ID
    * @param saveContactDataDto  SaveContactDataDto
    */
@@ -125,7 +119,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Save account data
-   *
    * @param id                  Seller ID
    * @param saveAccountDataDto  SaveAccountDataDto
    */
@@ -136,7 +129,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Save business data
-   *
    * @param id                  Seller ID
    * @param saveBusinessDataDto SaveBusinessDataDto
    */
@@ -147,7 +139,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Read store data
-   *
    * @param id  Seller ID
    */
   async getStoreData(id: string): Promise<StoreDataDto> {
@@ -158,7 +149,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Read contact data
-   *
    * @param id  Seller ID
    */
   async getContactData(id: string): Promise<ContactDataDto> {
@@ -169,7 +159,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Read account data
-   *
    * @param id  Seller ID
    */
   async getAccountData(id: string): Promise<AccountDataDto> {
@@ -180,7 +169,6 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Read business data
-   *
    * @param id  Seller ID
    */
   async getBusinessData(id: string): Promise<BusinessDataDto> {

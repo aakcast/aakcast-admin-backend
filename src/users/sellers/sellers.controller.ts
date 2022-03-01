@@ -61,7 +61,6 @@ export class SellersController {
 
   /**
    * Constructor
-   *
    * @param sellersService  Injected instance of SellersService
    */
   constructor(private readonly sellersService: SellersService) {}
@@ -83,7 +82,6 @@ export class SellersController {
 
   /**
    * POST /v1/sellers/
-   *
    * @param createSellerDto CreateSellerDto
    */
   @Post()
@@ -101,7 +99,6 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/
-   *
    * @param findSellersDto  FindSellersDto
    */
   @Get()
@@ -119,7 +116,6 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/:id/
-   *
    * @param id  Seller ID
    */
   @Get(':id')
@@ -136,8 +132,7 @@ export class SellersController {
   }
 
   /**
-   * PATCH /v1
-   *
+   * PATCH /v1/sellers/:id/
    * @param req             Request object
    * @param id              Seller ID
    * @param updateSellerDto UpdateSellerDto
@@ -163,7 +158,6 @@ export class SellersController {
 
   /**
    * POST /v1/sellers/:id/upload/
-   *
    * @param id  Seller ID
    * @param req Request object
    * @param res Reply object
@@ -244,7 +238,6 @@ export class SellersController {
 
   /**
    * PUT /v1/sellers/:id/store-data/
-   *
    * @param id                Seller ID
    * @param saveStoreDataDto  SaveStoreDataDto
    */
@@ -272,7 +265,6 @@ export class SellersController {
 
   /**
    * PUT /v1/sellers/:id/contact-data/
-   *
    * @param req                 Request object
    * @param id                  Seller ID
    * @param saveContactDataDto  SaveContactDataDto
@@ -302,7 +294,6 @@ export class SellersController {
 
   /**
    * PUT /v1/sellers/:id/account-data/
-   *
    * @param id                  Seller ID
    * @param saveAccountDataDto  SaveAccountDataDto
    */
@@ -330,7 +321,6 @@ export class SellersController {
 
   /**
    * PUT /v1/sellers/:id/business-data/
-   *
    * @param id                  Seller ID
    * @param saveBusinessDataDto SaveBusinessDataDto
    */
@@ -358,7 +348,6 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/:id/store-data/
-   *
    * @param id  Seller ID
    */
   @Get(':id/store-data')
@@ -376,7 +365,6 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/:id/contact-data/
-   *
    * @param id  Seller ID
    */
   @Get(':id/contact-data')
@@ -394,7 +382,6 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/:id/account-data/
-   *
    * @param id  Seller ID
    */
   @Get(':id/account-data')
@@ -412,7 +399,6 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/:id/business-data/
-   *
    * @param id  Seller ID
    */
   @Get(':id/business-data')

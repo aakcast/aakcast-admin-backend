@@ -6,7 +6,6 @@ import { ApiProperty } from '@nestjs/swagger';
 export class IdDto {
   /**
    * Constructor
-   *
    * @param response  protobuf response
    */
   constructor(response: { id: string }) {

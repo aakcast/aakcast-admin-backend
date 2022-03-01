@@ -22,7 +22,6 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Constructor
-   *
    * @param userPackage Injected instance of gRPC client for user microservice
    */
   constructor(@Inject('USER_PACKAGE') private readonly userPackage: ClientGrpc) {}
@@ -45,7 +44,6 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Validate user with email/password
-   *
    * @param type      Type of user
    * @param email     Email
    * @param password  Password
@@ -62,7 +60,6 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Find a user by email
-   *
    * @param type  Type of user
    * @param email Email
    */
@@ -78,7 +75,6 @@ export class UsersService implements OnModuleInit {
 
   /**
    * Reset password of a user
-   *
    * @param type      Type of user
    * @param email     Email
    * @param password  New password

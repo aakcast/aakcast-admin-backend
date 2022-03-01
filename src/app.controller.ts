@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
-import { UserDto } from './auth/dto/user.dto';
+import { UserDto } from './users/dto/user.dto';
 
 /**
  * Controller: App(root)
@@ -24,7 +24,6 @@ export class AppController {
 
   /**
    * Constructor
-   *
    * @param appService  Injected instance of AuthService
    */
   constructor(private readonly appService: AppService) {}
@@ -48,7 +47,6 @@ export class AppController {
 
   /**
    * GET /v1/profile/
-   *
    * @param req Request object
    */
   @Get('profile')

@@ -8,6 +8,9 @@ import fastifyMultipart from 'fastify-multipart';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './core/filters/exception.filter';
 
+/**
+ * Application entry point
+ */
 async function bootstrap() {
   const serverApp = new FastifyAdapter();
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, serverApp);

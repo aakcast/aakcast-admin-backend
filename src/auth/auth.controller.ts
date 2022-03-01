@@ -20,6 +20,7 @@ import {
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
   ApiResponseSchemaHost,
 } from '@nestjs/swagger';
 import { UsersService } from '../users/users.service';
@@ -87,7 +88,6 @@ export class AuthController {
 
   /**
    * Constructor
-   *
    * @param usersService  Injected instance of UsersService
    * @param authService   Injected instance of AuthService
    * @param jwtService    Injected instance of JwtService
@@ -106,6 +106,8 @@ export class AuthController {
     summary: 'Hello',
     description: 'API의 상태를 확인한다.',
   })
+  @ApiOkResponse({ description: '정상' })
+  @ApiInternalServerErrorResponse({ description: '서비스 접속 불가' })
   hello() {
     this.logger.log(`GET /v1/auth/hello/`);
     return this.authService.hello();
@@ -113,7 +115,6 @@ export class AuthController {
 
   /**
    * GET /v1/auth/verify-email/
-   *
    * @param verifyEmailDto  VerifyEmailDto
    */
   @Get('verify-email')
@@ -139,7 +140,6 @@ export class AuthController {
 
   /**
    * POST /v1/auth/login/
-   *
    * @param req   Request object
    */
   @Post('login')
@@ -185,7 +185,6 @@ export class AuthController {
 
   /**
    * POST /v1/auth/request-otp/
-   *
    * @param requestOtpDto RequestOtpDto
    */
   @Post('request-otp')
@@ -215,7 +214,6 @@ export class AuthController {
 
   /**
    * POST /v1/auth/login-otp/
-   *
    * @param loginOtpDto LoginOtpDto
    */
   @Post('login-otp')
@@ -250,7 +248,6 @@ export class AuthController {
 
   /**
    * POST /v1/auth/reset-password/
-   *
    * @param req               Request object
    * @param resetPasswordDto  ResetPasswordDto
    */

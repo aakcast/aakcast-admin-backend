@@ -7,7 +7,6 @@ import { Otp as OtpResponse } from 'proto/auth';
 export class OtpDto {
   /**
    * Constructor
-   *
    * @param response  OtpResponse
    */
   constructor(response: OtpResponse) {

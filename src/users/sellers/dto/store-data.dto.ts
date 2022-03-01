@@ -7,7 +7,6 @@ import { SellerStoreData } from 'proto/user';
 export class StoreDataDto {
   /**
    * Constructor
-   *
    * @param response  SellerStoreData
    */
   constructor(response: SellerStoreData) {

@@ -4,7 +4,6 @@
 export class PaginatedDto<TData, TSrc = any> {
   /**
    * Constructor
-   *
    * @param cls       TData class constructor
    * @param response  protobuf response
    */

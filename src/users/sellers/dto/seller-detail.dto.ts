@@ -8,7 +8,6 @@ import { SellerDto } from './seller.dto';
 export class SellerDetailDto extends SellerDto {
   /**
    * Constructor
-   *
    * @param response  SellerResponse
    */
   constructor(response: SellerDetailResponse) {

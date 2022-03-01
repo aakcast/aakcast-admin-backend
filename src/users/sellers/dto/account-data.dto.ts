@@ -7,7 +7,6 @@ import { SellerAccountData } from 'proto/user';
 export class AccountDataDto {
   /**
    * Constructor
-   *
    * @param response  SellerAccountData
    */
   constructor(response: SellerAccountData) {

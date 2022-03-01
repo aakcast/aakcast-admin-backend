@@ -5,6 +5,10 @@ import { SellerBusinessData } from 'proto/user';
  * DTO: BusinessDataDto
  */
 export class BusinessDataDto {
+  /**
+   * Constructor
+   * @param response  BusinessDataDto
+   */
   constructor(response: SellerBusinessData) {
     this.isIndividual = response.isIndividual;
     this.repName = response.repName;

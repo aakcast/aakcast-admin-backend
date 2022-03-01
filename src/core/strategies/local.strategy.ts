@@ -11,7 +11,6 @@ import { UserDto } from '../../users/dto/user.dto';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   /**
    * Constructor
-   *
    * @param usersService Injected instance of auth service
    */
   constructor(private readonly usersService: UsersService) {
@@ -20,7 +19,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
   /**
    * Validate credentials
-   *
    * @param username  login ID of user
    * @param password  login password of user
    */

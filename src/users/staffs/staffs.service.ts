@@ -27,7 +27,6 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * Constructor
-   *
    * @param userPackage Injected instance of gRPC client for user microservice
    */
   constructor(@Inject('USER_PACKAGE') private readonly userPackage: ClientGrpc) {}
@@ -50,7 +49,6 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * Create new staff
-   *
    * @param createStaffDto  CreateStaffDto
    */
   async create(createStaffDto: CreateStaffDto): Promise<IdDto> {
@@ -61,7 +59,6 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * Find staffs
-   *
    * @param findStaffsDto FindStaffsDto
    */
   async find(findStaffsDto: FindStaffsDto): Promise<PaginatedDto<StaffDto>> {
@@ -72,7 +69,6 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * Find a staff by ID
-   *
    * @param id  Staff ID
    */
   async findOne(id: string): Promise<StaffDto> {
@@ -83,7 +79,6 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * Update existing staff
-   *
    * @param id              Staff ID
    * @param updateStaffDto  UpdateStaffDto
    */
@@ -94,7 +89,6 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * (Soft) delete existing staff
-   *
    * @param id  Staff ID
    */
   async delete(id: string): Promise<void> {
