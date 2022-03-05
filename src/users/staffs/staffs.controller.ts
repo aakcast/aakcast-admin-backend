@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiTags,
+  ApiExtraModels,
   ApiOperation,
   ApiBearerAuth,
   ApiOkResponse,
@@ -37,6 +38,7 @@ import { StaffDto } from './dto/staff.dto';
  */
 @Controller('staffs')
 @ApiTags('Staffs')
+@ApiExtraModels(PaginatedDto)
 export class StaffsController {
   /**
    * Logger instance
