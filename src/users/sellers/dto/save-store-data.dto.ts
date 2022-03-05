@@ -53,7 +53,7 @@ export class SaveStoreDataDto {
   @IsString()
   @ApiProperty({
     description: '스토어 소개',
-    example: '안녕하세 전주 현대옥 가락점입니',
+    example: '안녕하세요 전주 현대옥 가락점입니다.',
   })
   description: string;
 
@@ -83,10 +83,10 @@ export class SaveStoreDataDto {
 
   @IsOptional()
   @IsString()
-  @IsPhoneNumber()
+  @IsPhoneNumber('KR')
   @ApiPropertyOptional({
     description: '매장 전화번호',
-    example: '00012345678',
+    example: '0212345678',
   })
   tel?: string;
 

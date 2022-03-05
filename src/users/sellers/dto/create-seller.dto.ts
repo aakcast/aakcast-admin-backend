@@ -9,7 +9,7 @@ export class CreateSellerDto {
   @IsString()
   @IsEmail()
   @ApiProperty({
-    description: '로그인 ID (이메일)',
+    description: '로그인 ID',
     example: 'mankiplayer@gmail.com',
   })
   email: string;
