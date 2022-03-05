@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsMobilePhone } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumberString, IsMobilePhone } from 'class-validator';
 
 /**
  * DTO: LoginOtp
@@ -15,8 +15,7 @@ export class LoginOtpDto {
   mobile: string;
 
   @IsNotEmpty()
-  @IsString()
-  @IsMobilePhone('ko-KR')
+  @IsNumberString()
   @ApiProperty({
     description: '6자리 일회용 인증코드',
     example: '623094',

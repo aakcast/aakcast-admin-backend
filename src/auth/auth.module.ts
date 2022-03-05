@@ -7,6 +7,8 @@ import { LocalStrategy } from '../core/strategies/local.strategy';
 import { JwtStrategy } from '../core/strategies/jwt.strategy';
 import { UserPackage } from '../users/users.module';
 import { UsersService } from '../users/users.service';
+import { NotificationPackage } from '../notifications/notifications.module';
+import { SmsService } from '../notifications/sms/sms.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -33,6 +35,7 @@ export const AuthPackage = ClientsModule.register([
   imports: [
     UserPackage,
     AuthPackage,
+    NotificationPackage,
     PassportModule,
     JwtModule.register({
       secret: 'my-secret',
@@ -43,7 +46,7 @@ export const AuthPackage = ClientsModule.register([
     }),
   ],
   controllers: [AuthController],
-  providers: [UsersService, AuthService, LocalStrategy, JwtStrategy],
+  providers: [UsersService, AuthService, SmsService, LocalStrategy, JwtStrategy],
   exports: [],
 })
 export class AuthModule {}

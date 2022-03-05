@@ -26,6 +26,7 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { SmsService } from '../notifications/sms/sms.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { CredentialDto } from './dto/credential.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
@@ -50,11 +51,13 @@ export class AuthController {
   /**
    * Constructor
    * @param usersService  Injected instance of UsersService
+   * @param smsService    Injected instance of SmsService
    * @param authService   Injected instance of AuthService
    * @param jwtService    Injected instance of JwtService
    */
   constructor(
     private readonly usersService: UsersService,
+    private readonly smsService: SmsService,
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
   ) {}
@@ -114,7 +117,7 @@ export class AuthController {
     this.logger.log(`POST /v1/auth/login/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 
-    const { id: sub, ...data }: UserDto = req.user;
+    const { id: sub, ...data } = req.user;
     const token = this.jwtService.sign({ sub, ...data });
     this.logger.log(`>> token generated: ${token}`);
 
@@ -142,13 +145,13 @@ export class AuthController {
 
     // Create OTP with mobile
     // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
-    const otp = await this.authService.issueTemporaryCredentials('seller', mobile, digits);
-    this.logger.log(`>> OTP created: ${mobile} [${otp.code}]`);
+    const { code } = await this.authService.issueTemporaryCredentials('seller', mobile, digits);
+    this.logger.log(`>> OTP created: ${mobile} [${code}]`);
 
-    // TODO: 일단 슬랙으로 보낸다
-    // const message = `[aakcast] 인증번호는 [${code}] 입니다.`;
-    // const empty$ = this.notificationService.sendSms({ mobile, message });
-    // await lastValueFrom(empty$);
+    // Send code to user's mobile
+    const body = `[aakcast] 인증번호는 [${code}] 입니다.`;
+    const to = `+82${mobile}`;
+    await this.smsService.send(body, to);
   }
 
   /**
@@ -176,7 +179,8 @@ export class AuthController {
     const auth = await this.authService.validateTemporaryCredentials('seller', mobile, code);
     this.logger.log(`>> user authorized: ${JSON.stringify(auth)}`);
 
-    const token = this.jwtService.sign(auth, { expiresIn: '10m' }); // available for 10 minutes
+    const { id: sub, ...data }: UserDto = auth;
+    const token = this.jwtService.sign({ sub, ...data }, { expiresIn: '10m' }); // available for 10 minutes
     this.logger.log(`>> token generated: ${token}`);
 
     return new TokenDescriptorDto(token);
