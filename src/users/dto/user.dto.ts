@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User as UserResponse } from 'proto/auth';
+import { User as UserResponse } from 'proto/user';
 
 /**
  * DTO: User
@@ -14,7 +14,7 @@ export class UserDto {
     this.id = response.id;
     this.email = response.email;
     this.isAdmin = response.isAdmin;
-    this.joinedAt = response.createdAt as Date;
+    this.joinedAt = new Date(response.createdAt);
   }
 
   @ApiProperty({

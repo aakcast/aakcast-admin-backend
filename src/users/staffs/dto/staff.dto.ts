@@ -16,7 +16,7 @@ export class StaffDto {
     this.mobile = response.mobile;
     this.department = response.department;
     this.isAdmin = response.isAdmin;
-    this.joinedAt = response.createdAt as Date;
+    this.joinedAt = new Date(response.createdAt);
     this.active = !response.deletedAt;
   }
 

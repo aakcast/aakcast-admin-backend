@@ -14,7 +14,7 @@ export class SellerDto {
     this.email = response.email;
     this.name = response.name;
     this.mobile = response.mobile;
-    this.joinedAt = response.createdAt as Date;
+    this.joinedAt = new Date(response.createdAt);
   }
 
   @ApiProperty({
