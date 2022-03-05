@@ -3,9 +3,9 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { APP_SERVICE_NAME, SELLERS_SERVICE_NAME, AppClient, SellersClient } from 'proto/user';
 import { IdDto } from '../../core/dto/id.dto';
+import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
-import { FindSellersDto } from './dto/find-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
 import { SaveStoreDataDto } from './dto/save-store-data.dto';
 import { SaveContactDataDto } from './dto/save-contact-data.dto';
@@ -69,10 +69,10 @@ export class SellersService implements OnModuleInit {
 
   /**
    * Find sellers
-   * @param findSellersDto  FindSellersDto
+   * @param findDto FindDto
    */
-  async find(findSellersDto: FindSellersDto): Promise<PaginatedDto<SellerDto>> {
-    const res$ = this.sellersClient.find(findSellersDto);
+  async find(findDto: FindDto): Promise<PaginatedDto<SellerDto>> {
+    const res$ = this.sellersClient.find(findDto);
     const res = await lastValueFrom(res$);
     return new PaginatedDto(SellerDto, res);
   }

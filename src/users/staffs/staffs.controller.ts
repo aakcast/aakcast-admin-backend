@@ -38,7 +38,6 @@ import { StaffDto } from './dto/staff.dto';
  */
 @Controller('staffs')
 @ApiTags('Staffs')
-@ApiExtraModels(PaginatedDto)
 export class StaffsController {
   /**
    * Logger instance
@@ -93,6 +92,7 @@ export class StaffsController {
     summary: '직원 목록 및 검색',
     description: '직원 목록을 가져오거나 검색한다.',
   })
+  @ApiExtraModels(PaginatedDto)
   @ApiPaginatedResponse(StaffDto)
   find(@Query(FindPipe) findDto: FindDto): Promise<PaginatedDto<StaffDto>> {
     this.logger.log(`GET /v1/staffs/`);

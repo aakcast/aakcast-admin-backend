@@ -31,7 +31,7 @@ export class UserDto {
 
   @ApiProperty({
     description: '로그인 이메일',
-    example: 'mankiplayer@gmail.com',
+    example: 'mankiplayer@aakcast.io',
   })
   readonly email: string;
 

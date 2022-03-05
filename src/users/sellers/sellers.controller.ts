@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiTags,
+  ApiExtraModels,
   ApiOperation,
   ApiBearerAuth,
   ApiConsumes,
@@ -32,9 +33,9 @@ import { FastifyReply } from 'fastify';
 import { SellersService } from './sellers.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { IdDto } from '../../core/dto/id.dto';
+import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
-import { FindSellersDto } from './dto/find-sellers.dto';
 import { UpdateSellerDto } from './dto/update-seller-dto';
 import { SaveStoreDataDto } from './dto/save-store-data.dto';
 import { SaveContactDataDto } from './dto/save-contact-data.dto';
@@ -99,19 +100,20 @@ export class SellersController {
 
   /**
    * GET /v1/sellers/
-   * @param findSellersDto  FindSellersDto
+   * @param findDto FindDto
    */
   @Get()
   @ApiOperation({
     summary: '판매자 목록 및 검색',
     description: '판매자 목록을 가져오거나 검색한다.',
   })
+  @ApiExtraModels(PaginatedDto, SellerDto)
   @ApiPaginatedResponse(SellerDto)
-  find(@Query() findSellersDto: FindSellersDto): Promise<PaginatedDto<SellerDto>> {
+  find(@Query() findDto: FindDto): Promise<PaginatedDto<SellerDto>> {
     this.logger.log(`GET /v1/sellers/`);
-    this.logger.log(`> query = ${JSON.stringify(findSellersDto)}`);
+    this.logger.log(`> query = ${JSON.stringify(findDto)}`);
 
-    return this.sellersService.find(findSellersDto);
+    return this.sellersService.find(findDto);
   }
 
   /**

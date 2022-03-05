@@ -10,7 +10,7 @@ export class VerifyEmailDto {
   @IsEmail()
   @ApiProperty({
     description: '로그인 ID (이메일)',
-    example: 'mankiplayer@gmail.com',
+    example: 'mankiplayer@aakcast.io',
   })
   email: string;
 }
