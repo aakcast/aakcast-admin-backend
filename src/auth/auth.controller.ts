@@ -21,58 +21,19 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
-  ApiResponseSchemaHost,
 } from '@nestjs/swagger';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { CredentialDto } from './dto/credential.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserDto } from './dto/user.dto';
-
-/** Schema object - EmailVerification */
-const emailVerificationSchema: ApiResponseSchemaHost['schema'] = {
-  title: 'EmailVerification',
-  required: ['email', 'exists'],
-  properties: {
-    email: {
-      type: 'string',
-      example: 'mankiplayer@gmail.com',
-    },
-    exists: {
-      type: 'boolean',
-      description: '회원 가입 여부',
-      example: true,
-    },
-  },
-};
-
-/** Schema object - TokenDescriptor */
-const tokenDescriptorSchema: ApiResponseSchemaHost['schema'] = {
-  title: 'TokenDescriptor',
-  required: [],
-  properties: {
-    scheme: {
-      type: 'string',
-      description: '인증 방식',
-      example: 'bearer',
-    },
-    format: {
-      type: 'string',
-      description: '토큰 형식',
-      example: 'JWT',
-    },
-    token: {
-      type: 'string',
-      description: '토큰값 (Authorization 헤더에 설정하여 인증한다.)',
-      example:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-    },
-  },
-};
+import { EmailVerificationDto } from './dto/email-verification.dto';
+import { TokenDescriptorDto } from './dto/token-descriptor.dto';
 
 /**
  * Controller: Auth
@@ -122,20 +83,18 @@ export class AuthController {
     summary: '이메일 확인',
     description: '이메일의 가입 여부를 확인한다.',
   })
-  @ApiOkResponse({ description: '성공', schema: emailVerificationSchema })
-  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto) {
+  @ApiOkResponse({ description: '성공', type: EmailVerificationDto })
+  async verifyEmail(@Query() verifyEmailDto: VerifyEmailDto): Promise<EmailVerificationDto> {
     this.logger.log(`GET /v1/auth/verify-email/`);
     this.logger.log(`> query = ${JSON.stringify(verifyEmailDto)}`);
 
     const { email } = verifyEmailDto;
 
     // 판매자 계정에 대해서만 지원하는 것으로 한다. 직원 계정에도 적용 시 계정 타입을 입력 받도록 한다.
-    const staff = await this.usersService.findOneByEmail('seller', email);
+    const seller = await this.usersService.findOneByEmail('seller', email);
+    const exists = seller !== null && seller !== undefined;
 
-    return {
-      email,
-      exists: staff !== null && staff !== undefined,
-    };
+    return new EmailVerificationDto(email, exists);
   }
 
   /**
@@ -148,27 +107,10 @@ export class AuthController {
     summary: '로그인',
     description: '이메일과 비밀번호를 통해 로그인하고 JWT 토큰을 발급받는다.',
   })
-  @ApiBody({
-    schema: {
-      title: 'LoginDto',
-      required: ['email', 'password'],
-      properties: {
-        email: {
-          type: 'string',
-          description: '로그인 ID',
-          example: 'mankiplayer@gmail.com',
-        },
-        password: {
-          type: 'string',
-          description: '로그인 비밀번호',
-          example: 'p@ssw0rd',
-        },
-      },
-    },
-  })
-  @ApiOkResponse({ description: '성공', schema: tokenDescriptorSchema })
+  @ApiBody({ type: CredentialDto })
+  @ApiOkResponse({ description: '성공', type: TokenDescriptorDto })
   @ApiUnauthorizedResponse({ description: '존재하지 않는 이메일 또는 비밀번호 불일치' })
-  login(@Req() req: any) {
+  login(@Req() req: any): TokenDescriptorDto {
     this.logger.log(`POST /v1/auth/login/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 
@@ -176,11 +118,7 @@ export class AuthController {
     const token = this.jwtService.sign({ sub, ...data });
     this.logger.log(`>> token generated: ${token}`);
 
-    return {
-      scheme: 'bearer',
-      format: 'JWT',
-      token,
-    };
+    return new TokenDescriptorDto(token);
   }
 
   /**
@@ -223,12 +161,12 @@ export class AuthController {
     description:
       '핸드폰 번호와 인증코드를 통해 임시 자격으로 로그인한다. 이메일을 제공하여 로그인 한 경우 비밀번호 변경 권한이 주어지고 그렇지 않은 경우 계정 정보만 확인할 수 있다.',
   })
-  @ApiOkResponse({ description: '성공', schema: tokenDescriptorSchema })
+  @ApiOkResponse({ description: '성공', type: TokenDescriptorDto })
   @ApiNotFoundResponse({
     description: '핸드폰 정보를 찾을 수 없거나 또는 핸드폰가 일치하지 않음 (이메일 제공 시에만)',
   })
   @ApiUnauthorizedResponse({ description: '잘못된 인증번호이거나 인증 시간이 초과됨' })
-  async loginWithOtp(@Body() loginOtpDto: LoginOtpDto) {
+  async loginWithOtp(@Body() loginOtpDto: LoginOtpDto): Promise<TokenDescriptorDto> {
     this.logger.log(`POST /auth/login-otp/`);
     this.logger.log(`> body = ${JSON.stringify(loginOtpDto)}`);
 
@@ -241,11 +179,7 @@ export class AuthController {
     const token = this.jwtService.sign(auth, { expiresIn: '10m' }); // available for 10 minutes
     this.logger.log(`>> token generated: ${token}`);
 
-    return {
-      scheme: 'bearer',
-      format: 'JWT',
-      token,
-    };
+    return new TokenDescriptorDto(token);
   }
 
   /**

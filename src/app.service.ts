@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import fs from 'fs';
 
 /**
  * Service: App
@@ -9,9 +10,12 @@ export class AppService {
    * Say hello
    */
   getHello() {
+    const file = fs.readFileSync('package.json', { encoding: 'utf8' });
+    const { name, version, description } = JSON.parse(file);
     return {
-      service: 'aakcast-admin-backend',
-      version: '1.0',
+      name,
+      version,
+      description,
     };
   }
 }
