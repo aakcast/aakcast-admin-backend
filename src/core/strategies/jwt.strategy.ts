@@ -26,7 +26,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param payload JWT payload
    */
   async validate(payload: any): Promise<UserDto> {
-    const { sub: id, ...data } = payload;
-    return { id, ...data };
+    return new UserDto({
+      type: payload.type,
+      id: payload.sub,
+      email: payload.email,
+      isAdmin: payload.isAdmin,
+      createdAt: payload.joinedAt,
+    });
   }
 }
