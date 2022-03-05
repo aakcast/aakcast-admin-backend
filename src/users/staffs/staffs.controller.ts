@@ -25,9 +25,10 @@ import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorat
 import { StaffsService } from './staffs.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { IdDto } from '../../core/dto/id.dto';
+import { FindDto } from '../../core/dto/find.dto';
+import { FindPipe } from '../../core/pipes/find.pipe';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';
-import { FindStaffsDto } from './dto/find-staffs.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffDto } from './dto/staff.dto';
 
@@ -83,7 +84,7 @@ export class StaffsController {
 
   /**
    * GET /v1/staffs/
-   * @param findStaffsDto FindStaffsDto
+   * @param findDto FindDto
    */
   @Get()
   @ApiOperation({
@@ -91,11 +92,11 @@ export class StaffsController {
     description: '직원 목록을 가져오거나 검색한다.',
   })
   @ApiPaginatedResponse(StaffDto)
-  find(@Query() findStaffsDto: FindStaffsDto): Promise<PaginatedDto<StaffDto>> {
+  find(@Query(FindPipe) findDto: FindDto): Promise<PaginatedDto<StaffDto>> {
     this.logger.log(`GET /v1/staffs/`);
-    this.logger.log(`> query = ${JSON.stringify(findStaffsDto)}`);
+    this.logger.log(`> query = ${JSON.stringify(findDto)}`);
 
-    return this.staffsService.find(findStaffsDto);
+    return this.staffsService.find(findDto);
   }
 
   /**

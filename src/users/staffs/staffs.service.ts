@@ -3,9 +3,9 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { APP_SERVICE_NAME, STAFFS_SERVICE_NAME, AppClient, StaffsClient } from 'proto/user';
 import { IdDto } from '../../core/dto/id.dto';
+import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';
-import { FindStaffsDto } from './dto/find-staffs.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffDto } from './dto/staff.dto';
 
@@ -59,10 +59,10 @@ export class StaffsService implements OnModuleInit {
 
   /**
    * Find staffs
-   * @param findStaffsDto FindStaffsDto
+   * @param findDto FindDto
    */
-  async find(findStaffsDto: FindStaffsDto): Promise<PaginatedDto<StaffDto>> {
-    const res$ = this.staffsClient.find(findStaffsDto);
+  async find(findDto: FindDto): Promise<PaginatedDto<StaffDto>> {
+    const res$ = this.staffsClient.find(findDto);
     const res = await lastValueFrom(res$);
     return new PaginatedDto(StaffDto, res);
   }
