@@ -61,7 +61,7 @@ export class AuthService implements OnModuleInit {
       type,
       mobile,
       digits,
-      expires: new Date(Date.now() + 3 * 60 * 1000).toString(), // 3 minutes
+      age: 180, // 3 minutes
     });
     const res = await lastValueFrom(res$);
     return new OtpDto(res);
