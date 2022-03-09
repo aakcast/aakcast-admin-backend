@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AAKCAST_COMMON_PACKAGE_NAME } from '../../proto/common';
 import { AAKCAST_USER_PACKAGE_NAME } from 'proto/user';
+import { StoragePackage } from '../storage/storage.module';
 import { UsersService } from './users.service';
+import { ObjectsService } from '../storage/objects/objects.service';
 import { StaffsController } from './staffs/staffs.controller';
 import { StaffsService } from './staffs/staffs.service';
 import { SellersService } from './sellers/sellers.service';
@@ -17,8 +20,8 @@ export const UserPackage = ClientsModule.register([
     transport: Transport.GRPC,
     options: {
       url: '0.0.0.0:7001',
-      package: AAKCAST_USER_PACKAGE_NAME,
-      protoPath: ['proto/user.proto'],
+      package: [AAKCAST_COMMON_PACKAGE_NAME, AAKCAST_USER_PACKAGE_NAME],
+      protoPath: 'proto/user.proto',
     },
   },
 ]);
@@ -27,9 +30,9 @@ export const UserPackage = ClientsModule.register([
  * Module: Users
  */
 @Module({
-  imports: [UserPackage],
+  imports: [UserPackage, StoragePackage],
   controllers: [StaffsController, SellersController],
-  providers: [UsersService, StaffsService, SellersService],
+  providers: [UsersService, StaffsService, SellersService, ObjectsService],
   exports: [UsersService],
 })
 export class UsersModule {}

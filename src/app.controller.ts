@@ -41,7 +41,6 @@ export class AppController {
   })
   getHello() {
     this.logger.log(`GET /v1/`);
-
     return this.appService.getHello();
   }
 
@@ -61,7 +60,6 @@ export class AppController {
   getProfile(@Req() req: any): UserDto {
     this.logger.log(`GET /v1/profile/`);
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
-
     return req.user;
   }
 }

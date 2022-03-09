@@ -23,6 +23,7 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorator';
+import { UsersService } from '../users.service';
 import { StaffsService } from './staffs.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { IdDto } from '../../core/dto/id.dto';
@@ -47,9 +48,13 @@ export class StaffsController {
 
   /**
    * Constructor
+   * @param usersService  Injected instance of UsersService
    * @param staffsService Injected instance of StaffsService
    */
-  constructor(private readonly staffsService: StaffsService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly staffsService: StaffsService,
+  ) {}
 
   /**
    * GET /v1/staffs/hello/
@@ -63,7 +68,7 @@ export class StaffsController {
   @ApiInternalServerErrorResponse({ description: '서비스 접속 불가' })
   hello() {
     this.logger.log(`GET /v1/staffs/hello/`);
-    return this.staffsService.hello();
+    return this.usersService.hello();
   }
 
   /**

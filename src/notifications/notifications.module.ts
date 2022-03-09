@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AAKCAST_NOTIFICATION_PACKAGE_NAME } from '../../proto/notification';
+import { AAKCAST_COMMON_PACKAGE_NAME } from 'proto/common';
+import { AAKCAST_NOTIFICATION_PACKAGE_NAME } from 'proto/notification';
+import { NotificationsService } from './notifications.service';
 import { SmsService } from './sms/sms.service';
 
 /**
@@ -13,8 +15,8 @@ export const NotificationPackage = ClientsModule.register([
     transport: Transport.GRPC,
     options: {
       url: '0.0.0.0:7003',
-      package: AAKCAST_NOTIFICATION_PACKAGE_NAME,
-      protoPath: ['proto/notification.proto'],
+      package: [AAKCAST_COMMON_PACKAGE_NAME, AAKCAST_NOTIFICATION_PACKAGE_NAME],
+      protoPath: 'proto/notification.proto',
     },
   },
 ]);
@@ -24,7 +26,7 @@ export const NotificationPackage = ClientsModule.register([
  */
 @Module({
   imports: [NotificationPackage],
-  providers: [SmsService],
+  providers: [NotificationsService, SmsService],
   exports: [SmsService],
 })
 export class NotificationsModule {}

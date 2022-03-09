@@ -1,18 +1,13 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, SMS_SERVICE_NAME, AppClient, SmsClient } from 'proto/notification';
+import { SMS_SERVICE_NAME, SmsClient } from 'proto/notification';
 
 /**
  * Service: SMS
  */
 @Injectable()
 export class SmsService implements OnModuleInit {
-  /**
-   * App service client
-   * @private
-   */
-  private appClient: AppClient;
   /**
    * SMS service client
    * @private
@@ -29,16 +24,7 @@ export class SmsService implements OnModuleInit {
    * Implement OnModuleInit
    */
   onModuleInit() {
-    this.appClient = this.notificationPackage.getService<AppClient>(APP_SERVICE_NAME);
     this.smsClient = this.notificationPackage.getService<SmsClient>(SMS_SERVICE_NAME);
-  }
-
-  /**
-   * Hello
-   */
-  hello() {
-    const svc$ = this.appClient.hello({});
-    return lastValueFrom(svc$);
   }
 
   /**

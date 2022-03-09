@@ -1,36 +1,41 @@
 import {
-  Body,
   Controller,
   Get,
-  UseGuards,
-  Param,
   Patch,
   Post,
   Put,
-  Query,
+  UseGuards,
   Req,
   Res,
+  Param,
+  Query,
+  Body,
   Logger,
   BadRequestException,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiExtraModels,
-  ApiOperation,
   ApiBearerAuth,
-  ApiConsumes,
   ApiBody,
-  ApiOkResponse,
+  ApiConsumes,
   ApiCreatedResponse,
-  ApiNoContentResponse,
+  ApiExtraModels,
   ApiForbiddenResponse,
-  ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorator';
+import path from 'path';
+import crypto from 'crypto';
 import { FastifyReply } from 'fastify';
-// import { MultipartFile } from 'fastify-multipart';
+import { MultipartFile } from 'fastify-multipart';
+import { Bucket, ObjectInfo } from 'proto/storage';
+import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorator';
+import { UsersService } from '../users.service';
 import { SellersService } from './sellers.service';
+import { ObjectsService } from '../../storage/objects/objects.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { IdDto } from '../../core/dto/id.dto';
 import { FindDto } from '../../core/dto/find.dto';
@@ -62,9 +67,15 @@ export class SellersController {
 
   /**
    * Constructor
+   * @param usersService    Injected instance of UsersService
    * @param sellersService  Injected instance of SellersService
+   * @param objectsService  Injected instance of ObjectsService
    */
-  constructor(private readonly sellersService: SellersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly sellersService: SellersService,
+    private readonly objectsService: ObjectsService,
+  ) {}
 
   /**
    * GET /v1/sellers/hello/
@@ -78,7 +89,7 @@ export class SellersController {
   @ApiInternalServerErrorResponse({ description: '서비스 접속 불가' })
   hello() {
     this.logger.log(`GET /v1/sellers/hello/`);
-    return this.sellersService.hello();
+    return this.usersService.hello();
   }
 
   /**
@@ -165,7 +176,7 @@ export class SellersController {
    * @param res Reply object
    */
   @Post(':id/upload')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: '파일 업로드',
     description: '판매자와 관련된 파일(이미지)를 업로드한다.',
@@ -193,9 +204,9 @@ export class SellersController {
       items: {
         type: 'object',
         properties: {
-          filename: { type: 'string' },
-          mimetype: { type: 'string' },
           url: { type: 'string' },
+          length: { type: 'number' },
+          mimetype: { type: 'string' },
         },
       },
     },
@@ -212,30 +223,28 @@ export class SellersController {
       throw new BadRequestException();
     }
 
-    // // TODO: This is temporary implementation - files should be uploaded to S3
-    // const fs = await require('fs');
-    // const path = await require('path');
-    // const crypto = await require('crypto');
-    // const util = await require('util');
-    // const { pipeline } = await require('stream');
-    // const getHashFileName = async (part: MultipartFile, algorithm = 'sha256'): Promise<string> => {
-    //   const hash = crypto.createHash(algorithm);
-    //   hash.update(await part.toBuffer());
-    //   const ext = path.extname(part.filename);
-    //   return `${hash.digest('hex')}${ext}`;
-    // };
-    // const dir = `assets/sellers/${id}`;
-    // const pump = util.promisify(pipeline);
-    // fs.mkdirSync(dir, { recursive: true });
-    for await (const part of req.files()) {
-      console.log(part.filename);
-      console.log(part.mimetype);
-      // const filename = await getHashFileName(part);
-      // await pump(part.file, fs.createWriteStream(`${dir}/${filename}`));
-    }
-    // ////////////////////////////////////////////////////////////////////////////
+    const getHashFileName = async (part: MultipartFile, algorithm = 'sha256'): Promise<string> => {
+      const hash = crypto.createHash(algorithm);
+      hash.update(await part.toBuffer());
+      const ext = path.extname(part.filename);
+      return `${hash.digest('hex')}${ext}`;
+    };
+    const results: ObjectInfo[] = [];
 
-    res.code(200).send();
+    // Upload files
+    for await (const part of req.files()) {
+      const info = await this.objectsService.put({
+        target: {
+          bucket: Bucket.IMAGE,
+          key: `sellers/${req.user.id}/${await getHashFileName(part)}`,
+        },
+        mimetype: part.mimetype,
+        data: await part.toBuffer(),
+      });
+      results.push(info);
+    }
+
+    res.code(200).send(results);
   }
 
   /**

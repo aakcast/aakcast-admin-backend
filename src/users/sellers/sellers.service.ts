@@ -1,7 +1,7 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, SELLERS_SERVICE_NAME, AppClient, SellersClient } from 'proto/user';
+import { SELLERS_SERVICE_NAME, SellersClient } from 'proto/user';
 import { IdDto } from '../../core/dto/id.dto';
 import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
@@ -24,11 +24,6 @@ import { BusinessDataDto } from './dto/business-data.dto';
 @Injectable()
 export class SellersService implements OnModuleInit {
   /**
-   * App service client
-   * @private
-   */
-  private appClient: AppClient;
-  /**
    * Sellers service client
    * @private
    */
@@ -44,16 +39,7 @@ export class SellersService implements OnModuleInit {
    * Implement OnModuleInit
    */
   onModuleInit() {
-    this.appClient = this.userPackage.getService<AppClient>(APP_SERVICE_NAME);
     this.sellersClient = this.userPackage.getService<SellersClient>(SELLERS_SERVICE_NAME);
-  }
-
-  /**
-   * Hello
-   */
-  async hello() {
-    const svc$ = this.appClient.hello({});
-    return await lastValueFrom(svc$);
   }
 
   /**

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserDto } from '../../auth/dto/user.dto';
+import { UserDto } from '../../users/dto/user.dto';
 
 /**
  * Passport strategy: JWT
@@ -10,12 +11,13 @@ import { UserDto } from '../../auth/dto/user.dto';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   /**
    * Constructor
+   * @param configService Injected instance of ConfigService
    */
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     super({
-      secretOrKey: 'my-secret', // TODO
+      secretOrKey: configService.get<string>('JWT_SECRET'),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      issuer: 'aakcast.io',
+      issuer: configService.get<string>('JWT_ISSUER'),
       ignoreExpiration: false,
     });
   }

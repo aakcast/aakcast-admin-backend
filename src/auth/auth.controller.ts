@@ -9,6 +9,7 @@ import {
   Body,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
   ApiBearerAuth,
@@ -23,16 +24,16 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { UsersService } from '../users/users.service';
-import { AuthService } from './auth.service';
+import { SmsService } from '../notifications/sms/sms.service';
 import { LocalAuthGuard } from '../core/guards/local-auth.guard';
 import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
-import { SmsService } from '../notifications/sms/sms.service';
+import { UserDto } from '../users/dto/user.dto';
+import { AuthService } from './auth.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { CredentialDto } from './dto/credential.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UserDto } from './dto/user.dto';
 import { EmailVerificationDto } from './dto/email-verification.dto';
 import { TokenDescriptorDto } from './dto/token-descriptor.dto';
 
@@ -50,16 +51,18 @@ export class AuthController {
 
   /**
    * Constructor
+   * @param configService Injected instance of ConfigService
+   * @param jwtService    Injected instance of JwtService
    * @param usersService  Injected instance of UsersService
    * @param smsService    Injected instance of SmsService
    * @param authService   Injected instance of AuthService
-   * @param jwtService    Injected instance of JwtService
    */
   constructor(
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly smsService: SmsService,
     private readonly authService: AuthService,
-    private readonly jwtService: JwtService,
   ) {}
 
   /**
@@ -118,7 +121,9 @@ export class AuthController {
     this.logger.log(`> req.user = ${JSON.stringify(req.user)}`);
 
     const { id: sub, ...data } = req.user;
-    const token = this.jwtService.sign({ sub, ...data });
+    const expiresIn = this.configService.get<string>('ACCESS_TOKEN_LIFETIME', '3d');
+
+    const token = this.jwtService.sign({ sub, ...data }, { expiresIn });
     this.logger.log(`>> token generated: ${token}`);
 
     return new TokenDescriptorDto(token);

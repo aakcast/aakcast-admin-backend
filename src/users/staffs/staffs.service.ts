@@ -1,7 +1,7 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { APP_SERVICE_NAME, STAFFS_SERVICE_NAME, AppClient, StaffsClient } from 'proto/user';
+import { STAFFS_SERVICE_NAME, StaffsClient } from 'proto/user';
 import { IdDto } from '../../core/dto/id.dto';
 import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
@@ -14,11 +14,6 @@ import { StaffDto } from './dto/staff.dto';
  */
 @Injectable()
 export class StaffsService implements OnModuleInit {
-  /**
-   * App service client
-   * @private
-   */
-  private appClient: AppClient;
   /**
    * Staffs service client
    * @private
@@ -35,16 +30,7 @@ export class StaffsService implements OnModuleInit {
    * Implement OnModuleInit
    */
   onModuleInit() {
-    this.appClient = this.userPackage.getService<AppClient>(APP_SERVICE_NAME);
     this.staffsClient = this.userPackage.getService<StaffsClient>(STAFFS_SERVICE_NAME);
-  }
-
-  /**
-   * Hello
-   */
-  hello() {
-    const svc$ = this.appClient.hello({});
-    return lastValueFrom(svc$);
   }
 
   /**
