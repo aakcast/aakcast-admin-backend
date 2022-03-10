@@ -12,7 +12,7 @@ import { NotificationPackage } from '../notifications/notifications.module';
 import { SmsService } from '../notifications/sms/sms.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * DynamicModule: gRPC clients
@@ -42,7 +42,7 @@ export const AuthPackage = ClientsModule.register([
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('SECRET_KEY'),
         signOptions: {
           issuer: configService.get<string>('JWT_ISSUER', 'aakcast.io'),
         },

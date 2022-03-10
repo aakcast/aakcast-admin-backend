@@ -1,6 +1,7 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { VersioningType, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import fastifyCookie from 'fastify-cookie';
 import fastifyCsrf from 'fastify-csrf';
@@ -12,8 +13,9 @@ import { AllExceptionsFilter } from './core/filters/exception.filter';
  * Application entry point
  */
 async function bootstrap() {
-  const serverApp = new FastifyAdapter();
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, serverApp);
+  const httpAdapter = new FastifyAdapter();
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, httpAdapter);
+  const configService = app.get(ConfigService);
 
   // Enable CORS
   app.enableCors();
@@ -21,7 +23,9 @@ async function bootstrap() {
   // Register fastify plugins
   await Promise.all([
     // 1. cookie
-    app.register(fastifyCookie, { secret: 'my-secret' }), // TODO
+    app.register(fastifyCookie, {
+      secret: configService.get<string>('SECRET_KEY'),
+    }),
     // 2. CSRF protection
     app.register(fastifyCsrf),
     // 3. Multipart file upload
@@ -42,7 +46,7 @@ async function bootstrap() {
 
   // OpenAPI configuration
   const config = new DocumentBuilder()
-    .setTitle('aakcast™ REST API backend')
+    .setTitle('aakcast™ admin backend')
     .setDescription('REST API backend for aakcast™ admin')
     .setVersion('1.0')
     .addTag('App', '앱 기본 기능')
@@ -55,6 +59,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Start listening requests
-  await app.listen(3000);
+  const port = configService.get<number>('PORT', 3000);
+  await app.listen(port);
 }
 bootstrap();
