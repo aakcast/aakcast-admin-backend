@@ -16,8 +16,8 @@ export class StaffDto {
     this.mobile = response.mobile;
     this.department = response.department;
     this.isAdmin = response.isAdmin;
+    this.isActive = response.isActive;
     this.joinedAt = new Date(response.createdAt);
-    this.active = !response.deletedAt;
   }
 
   @ApiProperty({
@@ -57,14 +57,14 @@ export class StaffDto {
   readonly isAdmin: boolean;
 
   @ApiProperty({
+    description: '상태 (true: 정상, false: 중지)',
+    example: true,
+  })
+  readonly isActive: boolean;
+
+  @ApiProperty({
     description: '가입일시',
     example: new Date('2022-01-01T00:00:00Z'),
   })
   readonly joinedAt: Date;
-
-  @ApiProperty({
-    description: '활성 상태 여부',
-    example: true,
-  })
-  readonly active: boolean;
 }

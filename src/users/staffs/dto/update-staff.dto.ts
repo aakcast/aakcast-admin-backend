@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsMobilePhone, MinLength } from 'class-validator';
+import { IsOptional, IsBoolean, IsString, IsMobilePhone, MinLength } from 'class-validator';
 
 /**
  * DTO: UpdateStaff
@@ -38,4 +38,12 @@ export class UpdateStaffDto {
     example: '개발팀',
   })
   department?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: '상태 (true: 정상, false: 중지)',
+    example: true,
+  })
+  isActive?: boolean;
 }

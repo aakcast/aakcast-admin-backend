@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsOptional,
   IsNotEmpty,
+  IsBoolean,
   IsString,
   IsEmail,
   IsMobilePhone,
@@ -54,4 +55,13 @@ export class CreateStaffDto {
     example: '개발팀',
   })
   department?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: '상태 (true: 정상, false: 중지)',
+    example: true,
+    default: true,
+  })
+  isActive = true;
 }

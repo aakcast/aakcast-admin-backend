@@ -29,7 +29,7 @@ export class StaffsService implements OnModuleInit {
   /**
    * Implement OnModuleInit
    */
-  onModuleInit() {
+  onModuleInit(): void {
     this.staffsClient = this.userPackage.getService<StaffsClient>(STAFFS_SERVICE_NAME);
   }
 
