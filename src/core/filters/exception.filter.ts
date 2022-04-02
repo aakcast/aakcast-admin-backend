@@ -38,27 +38,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       httpException = exception;
     } else {
       // Transform to HttpException
+      let response: Record<string, any>;
+      let status: number;
 
-      let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      let message = 'Unknown';
-
-      // Handle exceptions propagated from microservices
       if (isGrpcError(exception) && exception.details) {
-        const match = exception.details.match(/^(\d{3}) (.*)$/);
-        if (match) {
-          statusCode = parseInt(match[1]);
-          message = match[2];
-        } else {
-          message = exception.details;
-        }
+        response = JSON.parse(exception.details);
+        status = response.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR;
+      } else {
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        response = {
+          statusCode: status,
+          message: exception.message || 'Unknown',
+          error: http.STATUS_CODES[status],
+        };
       }
 
-      const response = {
-        statusCode,
-        message,
-        error: http.STATUS_CODES[statusCode],
-      };
-      httpException = new HttpException(response, statusCode);
+      httpException = new HttpException(response, status);
     }
 
     const { httpAdapter } = this.httpAdapterHost;

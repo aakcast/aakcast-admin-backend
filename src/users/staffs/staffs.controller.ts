@@ -1,8 +1,8 @@
 import {
   Controller,
   UseGuards,
-  Get,
   Post,
+  Get,
   Delete,
   Patch,
   Req,
@@ -26,7 +26,7 @@ import { ApiPaginatedResponse } from '../../core/decorators/api-response.decorat
 import { UsersService } from '../users.service';
 import { StaffsService } from './staffs.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { IdDto } from '../../core/dto/id.dto';
+import { UuidDto } from '../../core/dto/uuid.dto';
 import { FindDto } from '../../core/dto/find.dto';
 import { FindPipe } from '../../core/pipes/find.pipe';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
@@ -80,8 +80,8 @@ export class StaffsController {
     summary: '직원 생성',
     description: '직원 계정을 생성한다.',
   })
-  @ApiCreatedResponse({ description: '정상 생성됨', type: IdDto })
-  create(@Body() createStaffDto: CreateStaffDto): Promise<IdDto> {
+  @ApiCreatedResponse({ description: '정상 생성됨', type: UuidDto })
+  create(@Body() createStaffDto: CreateStaffDto): Promise<UuidDto> {
     this.logger.log(`POST /v1/staffs/`);
     this.logger.log(`> body = ${JSON.stringify(createStaffDto)}`);
 
@@ -108,7 +108,7 @@ export class StaffsController {
 
   /**
    * GET /v1/staffs/:id/
-   * @param id  StaffDto ID
+   * @param id  Staff ID
    */
   @Get(':id')
   @ApiOperation({
@@ -126,7 +126,7 @@ export class StaffsController {
   /**
    * PATCH /v1/staffs/:id/
    * @param req             Request object
-   * @param id              StaffDto ID
+   * @param id              Staff ID
    * @param updateStaffDto  UpdateStaffDto
    */
   @Patch(':id')
@@ -136,7 +136,7 @@ export class StaffsController {
     description: '직원 정보를 수정한다.',
   })
   @ApiBearerAuth()
-  @ApiNoContentResponse({ description: '정상적으로 변경됨' })
+  @ApiNoContentResponse({ description: '정상 수정됨' })
   async update(
     @Req() req: any,
     @Param('id') id: string,
@@ -150,7 +150,7 @@ export class StaffsController {
 
   /**
    * DELETE /v1/staffs/:id/
-   * @param id  StaffDto ID
+   * @param id  Staff ID
    */
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

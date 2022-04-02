@@ -2,7 +2,7 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { SELLERS_SERVICE_NAME, SellersClient } from 'proto/user';
-import { IdDto } from '../../core/dto/id.dto';
+import { UuidDto } from '../../core/dto/uuid.dto';
 import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
@@ -47,10 +47,10 @@ export class SellersService implements OnModuleInit {
    * @param createSellerDto CreateSellerDto
    * @return  ID of new seller
    */
-  async create(createSellerDto: CreateSellerDto): Promise<IdDto> {
+  async create(createSellerDto: CreateSellerDto): Promise<UuidDto> {
     const res$ = this.sellersClient.create(createSellerDto);
     const res = await lastValueFrom(res$);
-    return new IdDto(res);
+    return new UuidDto(res);
   }
 
   /**

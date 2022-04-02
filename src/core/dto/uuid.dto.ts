@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * DTO: Id
+ * DTO: Uuid
  */
-export class IdDto {
+export class UuidDto {
   /**
    * Constructor
    * @param response  protobuf response
    */
-  constructor(response: { id: number }) {
+  constructor(response: { id: string }) {
     this.id = response.id;
   }
 
   @ApiProperty({
     description: '생성된 개체 ID',
-    example: 100021,
+    example: '1ab09a32-b489-4c31-afe8-685770e4a9cf',
   })
-  readonly id: number;
+  readonly id: string;
 }

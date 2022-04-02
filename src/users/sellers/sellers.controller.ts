@@ -37,7 +37,7 @@ import { UsersService } from '../users.service';
 import { SellersService } from './sellers.service';
 import { ObjectsService } from '../../storage/objects/objects.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { IdDto } from '../../core/dto/id.dto';
+import { UuidDto } from '../../core/dto/uuid.dto';
 import { FindDto } from '../../core/dto/find.dto';
 import { PaginatedDto } from '../../core/dto/paginated.dto';
 import { CreateSellerDto } from './dto/create-seller.dto';
@@ -101,8 +101,8 @@ export class SellersController {
     summary: '판매자 생성',
     description: '판매자 계정을 생성한다.',
   })
-  @ApiCreatedResponse({ description: '정상 생성됨', type: IdDto })
-  create(@Body() createSellerDto: CreateSellerDto): Promise<IdDto> {
+  @ApiCreatedResponse({ description: '정상 생성됨', type: UuidDto })
+  create(@Body() createSellerDto: CreateSellerDto): Promise<UuidDto> {
     this.logger.log(`POST /v1/sellers/`);
     this.logger.log(`> body = ${JSON.stringify(createSellerDto)}`);
 
